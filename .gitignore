@@ -57,5 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
+# visual studio code dirs
+.vscode
 
 public/css/radial-progress.css

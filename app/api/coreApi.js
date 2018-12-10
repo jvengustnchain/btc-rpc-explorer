@@ -7,6 +7,7 @@ var coins = require("../coins.js");
 
 // choose one of the below: RPC to a node, or mock data while testing
 var rpcApi = require("./rpcApi.js");
+var newApi = require("./newApi.js");
 //var rpcApi = require("./mockApi.js");
 
 var miscCache = LRU(25);
@@ -452,9 +453,7 @@ function getBlocksByHeight(blockHeights) {
 }
 
 function getBlockByHash(blockHash) {
-	return tryCacheThenRpcApi(blockCache, "getBlockByHash-" + blockHash, 300000, function() {
-		return rpcApi.getBlockByHash(blockHash);
-	});
+	return newApi.getBlockByHash(blockHash);
 }
 
 function getBlocksByHash(blockHashes) {
@@ -717,6 +716,7 @@ function logCacheSizes() {
 	stream.write("itemCounts: " + JSON.stringify(itemCounts) + "\n");
 	stream.end();
 }
+
 
 module.exports = {
 	getGenesisBlockHash: getGenesisBlockHash,
