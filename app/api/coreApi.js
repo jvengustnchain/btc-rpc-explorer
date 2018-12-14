@@ -378,9 +378,9 @@ function getMempoolStats () {
 }
 
 function getBlockByHeight (blockHeight) {
-  return tryCacheThenRpcApi(blockCache, 'getBlockByHeight-' + blockHeight, 300000, function () {
-    return rpcApi.getBlockByHeight(blockHeight)
-  })
+  // return tryCacheThenRpcApi(blockCache, 'getBlockByHeight-' + blockHeight, 300000, function () {
+  return newApi.getBlockByHeight(blockHeight)
+  // })
 }
 
 function getBlocksByHeight (blockHeights) {
@@ -436,7 +436,7 @@ function getBlockByHash (blockHash) {
 
 function getRawTransaction (txid) {
   var rpcApiFunction = function () {
-    return rpcApi.getRawTransaction(txid)
+    return newApi.getRawTransaction(txid)
   }
 
   return tryCacheThenRpcApi(txCache, 'getRawTransaction-' + txid, 300000, rpcApiFunction, shouldCacheTransaction)
