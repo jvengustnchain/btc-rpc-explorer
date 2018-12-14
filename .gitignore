@@ -60,4 +60,5 @@ typings/
 # visual studio code dirs
 .vscode
 
+.history
 public/css/radial-progress.css

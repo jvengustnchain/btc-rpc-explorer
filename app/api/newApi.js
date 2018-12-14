@@ -22,9 +22,9 @@ function getBlockByHash (blockHash) {
   })
 }
 
-function getBlocksByHash (blockHashes) {
-  let path = 'getblocks/' + blockHashes
-  console.log('trying to get blocks from new api!')
+function getBlockByHeight (height) {
+  let path = 'getblockbyheight/' + height
+  console.log('trying to get blocks by heightfrom new api!')
   return new Promise((resolve, reject) => {
     http.get(url + path, (resp) => {
       let data = ''
@@ -77,5 +77,7 @@ function getFromApiServer (path) {
 
 module.exports = {
   getBlockByHash: getBlockByHash,
+  getBlockByHeight: getBlockByHeight,
+  getRawTransaction: getRawTransaction,
   getRawTransactions: getRawTransactions
 }
