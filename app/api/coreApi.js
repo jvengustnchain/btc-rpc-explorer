@@ -466,7 +466,6 @@ function getRawTransactions (txids) {
   return new Promise(function (resolve, reject) {
     var combinedTxs = []
     if (txidsNotInCache.length > 0) {
-      console.log('getRawTransactions:', txids)
 
       newApi.getRawTransactions(txidsNotInCache).then(function (queriedTxs) {
         var queriedTxsCurrentIndex = 0
