@@ -2,7 +2,6 @@ var utils = require("../utils.js");
 var config = require("../config.js");
 var coins = require("../coins.js");
 
-
 function getBlockchainInfo() {
 	return getRpcData("getblockchaininfo");
 }
@@ -41,14 +40,15 @@ function getChainTxStats(blockCount) {
 
 function getBlockByHeight(blockHeight) {
 	return new Promise(function(resolve, reject) {
-		getBlocksByHeight([blockHeight]).then(function(results) {
+		getBlocksByHeight([blockHeight])
+		.then(function(results) {
 			if (results && results.length > 0) {
 				resolve(results[0]);
-
 			} else {
 				resolve(null);
 			}
-		}).catch(function(err) {
+		})
+		.catch(function(err) {
 			reject(err);
 		});
 	});
@@ -83,14 +83,15 @@ function getBlocksByHeight(blockHeights) {
 
 function getBlockByHash(blockHash) {
 	return new Promise(function(resolve, reject) {
-		getBlocksByHash([blockHash]).then(function(results) {
+		getBlocksByHash([blockHash])
+		.then(function(results) {
 			if (results && results.length > 0) {
 				resolve(results[0]);
-
 			} else {
 				resolve(null);
 			}
-		}).catch(function(err) {
+		})
+		.catch(function(err) {
 			reject(err);
 		});
 	});
@@ -109,8 +110,8 @@ function getBlocksByHash(blockHashes) {
 		}
 
 		var blocks = [];
-		client.command(batch).then((responses) => {
-			responses.forEach((item) => {
+		client.command(batch).then(responses => {
+			responses.forEach(item => {
 				if (item.tx) {
 					blocks.push(item);
 				}
@@ -118,13 +119,16 @@ function getBlocksByHash(blockHashes) {
 
 			var coinbaseTxids = [];
 			for (var i = 0; i < blocks.length; i++) {
-				coinbaseTxids.push(blocks[i].tx[0])
+				coinbaseTxids.push(blocks[i].tx[0]);
 			}
 
 			getRawTransactions(coinbaseTxids).then(function(coinbaseTxs) {
 				for (var i = 0; i < blocks.length; i++) {
 					blocks[i].coinbaseTx = coinbaseTxs[i];
-					blocks[i].totalFees = utils.getBlockTotalFeesFromCoinbaseTxAndBlockHeight(coinbaseTxs[i], blocks[i].height);
+					blocks[i].totalFees = utils.getBlockTotalFeesFromCoinbaseTxAndBlockHeight(
+						coinbaseTxs[i], 
+						blocks[i].height
+						);
 					blocks[i].miner = utils.getMinerFromCoinbaseTx(coinbaseTxs[i]);
 				}
 
@@ -136,18 +140,19 @@ function getBlocksByHash(blockHashes) {
 
 function getRawTransaction(txid) {
 	return new Promise(function(resolve, reject) {
-		getRawTransactions([txid]).then(function(results) {
+		getRawTransactions([txid])
+		.then(function(results) {
 			if (results && results.length > 0) {
 				if (results[0].txid) {
 					resolve(results[0]);
-
 				} else {
 					resolve(null);
 				}
 			} else {
 				resolve(null);
 			}
-		}).catch(function(err) {
+		})
+		.catch(function(err) {
 			reject(err);
 		});
 	});
@@ -337,8 +342,6 @@ function getRpcMethodHelp(methodName) {
 	});
 }
 
-
-
 function getRpcData(cmd) {
 	return new Promise(function(resolve, reject) {
 		client.command(cmd, function(err, result, resHeaders) {
@@ -346,7 +349,6 @@ function getRpcData(cmd) {
 				console.log("Error for RPC command '" + cmd + "': " + err);
 
 				reject(err);
-
 			} else {
 				resolve(result);
 			}
@@ -361,7 +363,6 @@ function getRpcDataWithParams(cmd, params) {
 				console.log("Error for RPC command '" + cmd + "': " + err);
 
 				reject(err);
-
 			} else {
 				resolve(result);
 			}

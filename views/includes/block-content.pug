@@ -72,7 +72,8 @@ div(class="tab-content")
 							div(class="row")
 								div(class="summary-split-table-label") Average Fee
 								div(class="summary-split-table-content monospace")
-									- var currencyValue = new Decimal(result.getblock.totalFees).dividedBy(result.getblock.txCount);
+									- var txcount = (result.getblock.txcount?result.getblock.txcount:result.getblock.tx.length)
+									- var currencyValue = new Decimal(result.getblock.totalFees).dividedBy(txcount);
 									include ./value-display.pug
 
 						- var blockRewardMax = coinConfig.blockRewardFunction(result.getblock.height);
@@ -195,11 +196,11 @@ div(class="tab-content")
 							else
 								span Transactions
 
-					if (!config.demoSite && !crawlerBot && txCount > 20)
-						div(class="col-md-8 text-right")
-							span(class="mr-2") Show
-							div(class="btn-group", role="group")
-								a(href=(paginationBaseUrl + "?limit=20"), class="btn btn-sm btn-primary px-2", class=((limit == 20 && txCount > limit) ? "active" : false)) 20
+					//- if (txCount > 10)
+					//- 	div(class="col-md-8 text-right")
+					//- 		span(class="mr-2") Show
+					//- 		div(class="btn-group", role="group")
+					//- 			a(href=(paginationBaseUrl + "?limit=10"), class="btn btn-sm btn-primary px-2", class=((limit == 10 && txCount > limit) ? "active" : false)) 10
 								
 								//- if (txCount > 50)
 								//- 	a(href=(paginationBaseUrl + "?limit=50"), class="btn btn-sm btn-primary px-2", class=(limit == 50 ? "active" : false)) 50

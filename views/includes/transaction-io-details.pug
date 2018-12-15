@@ -72,72 +72,73 @@ div(class="row monospace")
 			
 
 	div(class="col-lg-6")
-		each vout, voutIndex in tx.vout
-			div(class="row")
-				div(class="tx-io-label")
-					a(data-toggle="tooltip", title=("Output #" + (voutIndex + 1).toLocaleString()), style="white-space: nowrap;")
-						i(class=("fas fa-" + fontawesomeInputName + " mr-2"))
-						span(class="d-inline d-md-none") Output #
-						span #{(voutIndex + 1).toLocaleString()}
+		if(tx.vout)
+			each vout, voutIndex in tx.vout
+				div(class="row")
+					div(class="tx-io-label")
+						a(data-toggle="tooltip", title=("Output #" + (voutIndex + 1).toLocaleString()), style="white-space: nowrap;")
+							i(class=("fas fa-" + fontawesomeInputName + " mr-2"))
+							span(class="d-inline d-md-none") Output #
+							span #{(voutIndex + 1).toLocaleString()}
 
-				div(class="tx-io-content")
-					div(class="row")
-						div(class="tx-io-desc")
-							if (vout.scriptPubKey)
-								if (vout.scriptPubKey.addresses)
-									a(id=("output-" + voutIndex), href=("/address/" + vout.scriptPubKey.addresses[0]))
-										span(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
+					div(class="tx-io-content")
+						div(class="row")
+							div(class="tx-io-desc")
+								if (vout.scriptPubKey)
+									if (vout.scriptPubKey.addresses)
+										a(id=("output-" + voutIndex), href=("/address/" + vout.scriptPubKey.addresses[0]))
+											span(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
 
-									if (global.specialAddresses[vout.scriptPubKey.addresses[0]])
-										- var specialAddressInfo = global.specialAddresses[vout.scriptPubKey.addresses[0]];
-										if (specialAddressInfo.type == "minerPayout")
-											span  
-											a(data-toggle="tooltip", title=("Miner payout address: " + specialAddressInfo.minerInfo.name))
-												i(class="fas fa-certificate text-primary")
-										else if (specialAddressInfo.type == "donation")
-											span  
-											a(data-toggle="tooltip", title=("Development donation address. All support is appreciated!"))
-												i(class="fas fa-certificate text-primary")
+										if (global.specialAddresses[vout.scriptPubKey.addresses[0]])
+											- var specialAddressInfo = global.specialAddresses[vout.scriptPubKey.addresses[0]];
+											if (specialAddressInfo.type == "minerPayout")
+												span  
+												a(data-toggle="tooltip", title=("Miner payout address: " + specialAddressInfo.minerInfo.name))
+													i(class="fas fa-certificate text-primary")
+											else if (specialAddressInfo.type == "donation")
+												span  
+												a(data-toggle="tooltip", title=("Development donation address. All support is appreciated!"))
+													i(class="fas fa-certificate text-primary")
 
-								else if (vout.scriptPubKey.hex && vout.scriptPubKey.hex.startsWith('6a24aa21a9ed'))
-									span(class="monospace") Segregated Witness committment 
-									a(href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#commitment-structure", data-toggle="tooltip", title="View developer docs", target="_blank")  
-										i(class="fas fa-info-circle")
+									else if (vout.scriptPubKey.hex && vout.scriptPubKey.hex.startsWith('6a24aa21a9ed'))
+										span(class="monospace") Segregated Witness committment 
+										a(href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki#commitment-structure", data-toggle="tooltip", title="View developer docs", target="_blank")  
+											i(class="fas fa-info-circle")
 
-								else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
-									span(class="monospace") OP_RETURN: 
-									
-									- var opReturn = utils.getOpReturnTags(vout.scriptPubKey.asm); 
-									if(opReturn && opReturn.tag)
-										span(class="monospace") #{vout.scriptPubKey.asm.substring("OP_RETURN ".length)}
+									else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
+										span(class="monospace") OP_RETURN: 
+										
+										- var opReturn = utils.getOpReturnTags(vout.scriptPubKey.asm); 
+										if(opReturn && opReturn.tag)
+											span(class="monospace") #{vout.scriptPubKey.asm.substring("OP_RETURN ".length)}
 
-									br
-									span(class="monospace text-muted") ASCII:  #{utils.hex2ascii(vout.scriptPubKey.asm.substring("OP_RETURN ".length))}
-	
-								else
-									span(class="monospace")
-										span(class="text-danger font-weight-bold") Unable to decode output:
 										br
-										span(class="font-weight-bold") type: 
-										span #{vout.scriptPubKey.type}
-										br
-										span(class="font-weight-bold") asm: 
-										span #{vout.scriptPubKey.asm}
-										br
-										span(class="font-weight-bold") decodedHex: 
-										span #{utils.hex2ascii(vout.scriptPubKey.hex)}
+										span(class="monospace text-muted") ASCII:  #{utils.hex2ascii(vout.scriptPubKey.asm.substring("OP_RETURN ".length))}
+		
+									else
+										span(class="monospace")
+											span(class="text-danger font-weight-bold") Unable to decode output:
+											br
+											span(class="font-weight-bold") type: 
+											span #{vout.scriptPubKey.type}
+											br
+											span(class="font-weight-bold") asm: 
+											span #{vout.scriptPubKey.asm}
+											br
+											span(class="font-weight-bold") decodedHex: 
+											span #{utils.hex2ascii(vout.scriptPubKey.hex)}
 
-						div(class="tx-io-value")
-							- var currencyValue = vout.value;
-							include ./value-display.pug
+							div(class="tx-io-value")
+								- var currencyValue = vout.value;
+								include ./value-display.pug
 
-			hr
+				hr
 
-		div(class="row mb-5")
-			div(class="col")
-				div(class="font-weight-bold text-left text-md-right")
-					span(class="d-inline d-md-none") Total Output: 
-					- var currencyValue = totalIOValues.output;
-					include ./value-display.pug
+			div(class="row mb-5")
+				div(class="col")
+					div(class="font-weight-bold text-left text-md-right")
+						span(class="d-inline d-md-none") Total Output: 
+						- var currencyValue = totalIOValues.output;
+						include ./value-display.pug
 
 

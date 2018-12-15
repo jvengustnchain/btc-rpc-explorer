@@ -418,7 +418,7 @@ router.get("/block-height/:blockHeight", function(req, res) {
 		coreApi.getBlockByHashWithTransactions(result.hash, limit, offset).then(function(result) {
 			
 			res.locals.result.getblock = result.getblock
-			res.locals.result.getblock.txCount = result.getblock.tx.length
+			res.locals.result.getblock.txCount = (result.getblock.txcount?result.getblock.txcount:result.getblock.tx.length)
 			res.locals.result.transactions = result.transactions;
 			res.locals.result.txInputsByTransaction = result.txInputsByTransaction;
 
@@ -440,8 +440,8 @@ router.get("/block/:blockHash", function(req, res) {
 	if (req.query.limit) {
 		limit = parseInt(req.query.limit);
 
-		// for demo sites, limit page sizes
-		if (config.demoSite && limit > config.site.blockTxPageSize) {
+		// limit page sizes
+		if (limit > config.site.blockTxPageSize) {
 			limit = config.site.blockTxPageSize;
 
 			res.locals.userMessage = "Transaction page size limited to " + config.site.blockTxPageSize + ". If this is your site, you can change or disable this limit in the site config.";
@@ -459,7 +459,7 @@ router.get("/block/:blockHash", function(req, res) {
 	// TODO handle RPC error
 	coreApi.getBlockByHashWithTransactions(blockHash, limit, offset).then(function(result) {
 		res.locals.result.getblock = result.getblock;
-		res.locals.result.getblock.txCount = result.getblock.tx.length
+		res.locals.result.getblock.txCount = (result.getblock.txcount?result.getblock.txcount:result.getblock.tx.length)
 		res.locals.result.transactions = result.transactions;
 		res.locals.result.txInputsByTransaction = result.txInputsByTransaction;
 
@@ -515,8 +515,8 @@ router.get("/address/:address", function(req, res) {
 	if (req.query.limit) {
 		limit = parseInt(req.query.limit);
 
-		// for demo sites, limit page sizes
-		if (config.demoSite && limit > config.site.addressTxPageSize) {
+		// limit page sizes
+		if (limit > config.site.addressTxPageSize) {
 			limit = config.site.addressTxPageSize;
 
 			res.locals.userMessage = "Transaction page size limited to " + config.site.addressTxPageSize + ". If this is your site, you can change or disable this limit in the site config.";
