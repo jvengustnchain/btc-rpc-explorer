@@ -39,19 +39,19 @@ function getChainTxStats(blockCount) {
 }
 
 function getBlockByHeight(blockHeight) {
-  return new Promise(function(resolve, reject) {
-    getBlocksByHeight([blockHeight])
-      .then(function(results) {
-        if (results && results.length > 0) {
-          resolve(results[0]);
-        } else {
-          resolve(null);
-        }
-      })
-      .catch(function(err) {
-        reject(err);
-      });
-  });
+	return new Promise(function(resolve, reject) {
+		getBlocksByHeight([blockHeight])
+		.then(function(results) {
+			if (results && results.length > 0) {
+				resolve(results[0]);
+			} else {
+				resolve(null);
+			}
+		})
+		.catch(function(err) {
+			reject(err);
+		});
+	});
 }
 
 function getBlocksByHeight(blockHeights) {

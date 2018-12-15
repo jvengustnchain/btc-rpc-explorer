@@ -10,9 +10,9 @@ var rpcApi = require('./rpcApi.js')
 var newApi = require('./newApi.js')
 // var rpcApi = require("./mockApi.js");
 
-var miscCache = LRU(25);
-var blockCache = LRU(25);
-var txCache = LRU(100);
+var miscCache = LRU(25)
+var blockCache = LRU(25)
+var txCache = LRU(100)
 
 function getGenesisBlockHash () {
   return coins[config.coin].genesisBlockHash
@@ -54,7 +54,8 @@ function shouldCacheTransaction (tx) {
 }
 
 function shouldCacheBlock (block) {
-  return (block && block.tx && block.tx.length < 5000)
+  return false;
+  //return (block && block.tx && block.txcount < 5000 && false)
 }
 
 function getBlockchainInfo () {
@@ -410,7 +411,7 @@ function getBlocksByHeight (blockHeights) {
             combinedBlocks.push(queriedBlock)
 
             if (shouldCacheBlock(queriedBlock)) {
-              blockCache.set('getBlockByHeight-' + queriedBlock.height, queriedBlock, 300000)
+              //blockCache.set('getBlockByHeight-' + queriedBlock.height, queriedBlock, 300000)
             }
             queriedBlocksCurrentIndex++
           }
@@ -549,6 +550,7 @@ function getRawTransactionsWithInputs (txids, maxInputs = -1) {
   })
 }
 
+//TODO: Refactor this
 function getBlockByHashWithTransactions (blockHash, txLimit, txOffset) {
   return new Promise(function (resolve, reject) {
     getBlockByHash(blockHash).then(function (block) {
@@ -558,18 +560,75 @@ function getBlockByHashWithTransactions (blockHash, txLimit, txOffset) {
         txids.push(block.tx[0])
       }
 
+      if(txOffset >= 100  && block.txcount && block.txcount > txOffset){
+          newApi.getBlockTxIds (blockHash,txOffset - 100,txLimit).then(function (queriedTxs) {      
+            block.tx = queriedTxs;
+            for (var i = 0; i < queriedTxs.length; i++) {
+              txids.push(block.tx[i])
+            }
+          }).then(function(){
+            console.log('1.getBlockByHashWithTransactions : blockHash:', blockHash)
+            getRawTransactions(txids).then(function (transactions) {
+              if (transactions.length === txids.length) {
+                block.coinbaseTx = transactions[0]
+                block.totalFees = utils.getBlockTotalFeesFromCoinbaseTxAndBlockHeight(block.coinbaseTx, block.height)
+                block.miner = utils.getMinerFromCoinbaseTx(block.coinbaseTx)
+              }
+      
+              // if we're on page 2, we don't really want it anymore...
+              if (txOffset > 0) {
+                transactions.shift()
+              }
+      
+              var maxInputsTracked = config.site.txMaxInput
+              var vinTxids = []
+              for (var i = 0; i < transactions.length; i++) {
+                var transaction = transactions[i]
+      
+                if (transaction && transaction.vin) {
+                  for (var j = 0; j < Math.min(maxInputsTracked, transaction.vin.length); j++) {
+                    if (transaction.vin[j].txid) {
+                      vinTxids.push(transaction.vin[j].txid)
+                    }
+                  }
+                }
+              }
+      
+              var txInputsByTransaction = {}
+              console.log('2,getBlockByHashWithTransactions : blockId:', blockHash)
+      
+              getRawTransactions(vinTxids).then(function (vinTransactions) {
+                var vinTxById = {}
+      
+                vinTransactions.forEach(function (tx) {
+                  vinTxById[tx.txid] = tx
+                })
+      
+                transactions.forEach(function (tx) {
+                  txInputsByTransaction[tx.txid] = {}
+      
+                  if (tx && tx.vin) {
+                    for (var i = 0; i < Math.min(maxInputsTracked, tx.vin.length); i++) {
+                      if (vinTxById[tx.vin[i].txid]) {
+                        txInputsByTransaction[tx.txid][i] = vinTxById[tx.vin[i].txid]
+                      }
+                    }
+                  }
+      
+                  resolve({ getblock: block, transactions: transactions, txInputsByTransaction: txInputsByTransaction })
+                })
+              })
+            })
+
+          }); 
+               
+      } else {
       for (var i = txOffset; i < (txOffset + txLimit); i++) {
-        txids.push(block.tx[i])
-      }
-
-      if (block.tx.length > 15000) {
-        var transactions = []
-        for (i = 0; i < txids.length - 1; i++) {
-          transactions.push({ txid: txids[i] })
+        if(block.tx[i]){
+          txids.push(block.tx[i])
         }
-
-        resolve({ getblock: block, transactions: transactions, txInputsByTransaction: {} })
       }
+
       console.log('1.getBlockByHashWithTransactions : blockHash:', blockHash)
       getRawTransactions(txids).then(function (transactions) {
         if (transactions.length === txids.length) {
@@ -622,6 +681,8 @@ function getBlockByHashWithTransactions (blockHash, txLimit, txOffset) {
           })
         })
       })
+    }
+
     })
   })
 }

@@ -53,6 +53,17 @@ function getRawTransactions (txids) {
 }
 
 // getBlockByHashWithTransactions
+// /getblocktxids/**hash**/**skip**/**limit**
+
+function getRawTransaction (txid) {
+  console.log('trying to get rawtransaction from new api!')
+  return getFromApiServer('gettransaction/' + txid)
+}
+
+function getBlockTxIds (blockHash, offset, limit) {
+  console.log('trying to get rawtransaction from new api!')
+  return getFromApiServer('getblocktxids/' + blockHash +'/'+offset+'/'+limit)
+}
 
 function getFromApiServer (path) {
   return new Promise((resolve, reject) => {
@@ -75,9 +86,12 @@ function getFromApiServer (path) {
   })
 }
 
+
+
 module.exports = {
   getBlockByHash: getBlockByHash,
   getBlockByHeight: getBlockByHeight,
   getRawTransaction: getRawTransaction,
-  getRawTransactions: getRawTransactions
+  getRawTransactions: getRawTransactions,
+  getBlockTxIds: getBlockTxIds
 }

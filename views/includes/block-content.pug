@@ -72,7 +72,8 @@ div(class="tab-content")
 							div(class="row")
 								div(class="summary-split-table-label") Average Fee
 								div(class="summary-split-table-content monospace")
-									- var currencyValue = new Decimal(result.getblock.totalFees).dividedBy(result.getblock.txCount);
+									- var txcount = (result.getblock.txcount?result.getblock.txcount:result.getblock.tx.length)
+									- var currencyValue = new Decimal(result.getblock.totalFees).dividedBy(txcount);
 									include ./value-display.pug
 
 						- var blockRewardMax = coinConfig.blockRewardFunction(result.getblock.height);

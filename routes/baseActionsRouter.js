@@ -418,7 +418,7 @@ router.get("/block-height/:blockHeight", function(req, res) {
 		coreApi.getBlockByHashWithTransactions(result.hash, limit, offset).then(function(result) {
 			
 			res.locals.result.getblock = result.getblock
-			res.locals.result.getblock.txCount = result.getblock.tx.length
+			res.locals.result.getblock.txCount = (result.getblock.txcount?result.getblock.txcount:result.getblock.tx.length)
 			res.locals.result.transactions = result.transactions;
 			res.locals.result.txInputsByTransaction = result.txInputsByTransaction;
 
@@ -459,7 +459,7 @@ router.get("/block/:blockHash", function(req, res) {
 	// TODO handle RPC error
 	coreApi.getBlockByHashWithTransactions(blockHash, limit, offset).then(function(result) {
 		res.locals.result.getblock = result.getblock;
-		res.locals.result.getblock.txCount = result.getblock.tx.length
+		res.locals.result.getblock.txCount = (result.getblock.txcount?result.getblock.txcount:result.getblock.tx.length)
 		res.locals.result.transactions = result.transactions;
 		res.locals.result.txInputsByTransaction = result.txInputsByTransaction;
 
