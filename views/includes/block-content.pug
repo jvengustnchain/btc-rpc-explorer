@@ -46,7 +46,7 @@ div(class="tab-content")
 								if (result.getblock.previousblockhash)
 									a(class="word-wrap", href=("/block/" + result.getblock.previousblockhash)) #{result.getblock.previousblockhash}
 									br
-									span (##{(result.getblock.height - 1).toLocaleString()})
+									span (#{result.getblock.height - 1})
 
 								else if (result.getblock.hash == genesisBlockHash)
 									span None (genesis block)
@@ -126,7 +126,7 @@ div(class="tab-content")
 								if (result.getblock.nextblockhash)
 									a(href=("/block/" + result.getblock.nextblockhash)) #{result.getblock.nextblockhash}
 									br
-									span (##{(result.getblock.height + 1).toLocaleString()})
+									span (##{(result.getblock.height + 1)})
 								else
 									span None (latest block)
 
