@@ -46,7 +46,7 @@ div(class="tab-content")
 								if (result.getblock.previousblockhash)
 									a(class="word-wrap", href=("/block/" + result.getblock.previousblockhash)) #{result.getblock.previousblockhash}
 									br
-									span (#{result.getblock.height - 1})
+									span (##{result.getblock.height - 1})
 
 								else if (result.getblock.hash == genesisBlockHash)
 									span None (genesis block)
