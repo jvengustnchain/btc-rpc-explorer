@@ -12,8 +12,10 @@ function getBlockByHash (blockHash) {
         data += chunk
       })
       resp.on('end', () => {
-        var jsonResp = JSON.parse(data)
-        resolve(jsonResp)
+        if (data) {
+          var jsonResp = JSON.parse(data)
+          resolve(jsonResp)
+        }
       })
     }).on('error', (err) => {
       console.log('Error: ' + err.message)
