@@ -1,12 +1,18 @@
 const http = require('http')
+var config = require("./../config.js");
 
-const url = 'http://localhost:8080/'
+
+function getServiceURL()
+{
+  return 'http://' + config.apiServers[0].host + ':' + config.apiServers[0].port + '/';
+}
+
 
 function getBlockByHash (blockHash) {
   let path = 'getblock/' + blockHash
   console.log('trying to get block from new api!')
   return new Promise((resolve, reject) => {
-    http.get(url + path, (resp) => {
+    http.get(getServiceURL() + path, (resp) => {
       let data = ''
       resp.on('data', (chunk) => {
         data += chunk
@@ -28,7 +34,7 @@ function getBlockByHeight (height) {
   let path = 'getblockbyheight/' + height
   console.log('trying to get blocks by heightfrom new api!')
   return new Promise((resolve, reject) => {
-    http.get(url + path, (resp) => {
+    http.get(getServiceURL() + path, (resp) => {
       let data = ''
       resp.on('data', (chunk) => {
         data += chunk
@@ -55,7 +61,6 @@ function getRawTransactions (txids) {
 }
 
 // getBlockByHashWithTransactions
-// /getblocktxids/**hash**/**skip**/**limit**
 
 function getRawTransaction (txid) {
   console.log('trying to get rawtransaction from new api!')
@@ -69,7 +74,7 @@ function getBlockTxIds (blockHash, offset, limit) {
 
 function getFromApiServer (path) {
   return new Promise((resolve, reject) => {
-    http.get(url + path, (resp) => {
+    http.get(getServiceURL() + path, (resp) => {
       let data = ''
       // A chunk of data has been recieved.
       resp.on('data', (chunk) => {

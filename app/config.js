@@ -72,6 +72,10 @@ module.exports = {
     'walletpassphrasechange'
   ],
 
+  apiServers: [
+    {host:'localhost', port: 8084 , protocol: 'http'}
+  ],
+
   // https://uasf.saltylemon.org/electrum
   electrumXServers: [
     // set host & port of electrum servers to connect to
