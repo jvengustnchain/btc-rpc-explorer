@@ -73,7 +73,7 @@ module.exports = {
   ],
 
   apiServers: [
-    {host:'localhost', port: 8084 , protocol: 'http'}
+    { host: 'localhost', port: 8084, protocol: 'http' }
   ],
 
   // https://uasf.saltylemon.org/electrum
