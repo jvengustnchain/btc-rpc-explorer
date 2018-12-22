@@ -167,7 +167,7 @@ const getRawTransactions = txids => {
   const genesisCoinbaseTransaction = coins[config.coin].genesisCoinbaseTransaction
 
   return new Promise((resolve, reject) => {
-    if (!txids || txids.length == 0) {
+    if (!txids || txids.length === 0) {
       return resolve([])
     }
 
@@ -271,7 +271,7 @@ function getRpcMethodHelp (methodName) {
           argumentLines.push(line)
         }
 
-        if (line.trim() == 'Arguments:' || line.trim() == 'Arguments') {
+        if (line.trim() === 'Arguments:' || line.trim() === 'Arguments') {
           catchArgs = true
         }
       })
