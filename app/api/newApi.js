@@ -90,8 +90,15 @@ function getFromApiServer (path) {
       // The whole response has been received. Print out the result.
       resp.on('end', () => {
         if(data.length > 0 ){
-        var jsonResp = JSON.parse(data)
-        resolve(jsonResp)
+        try {
+          var jsonResp = JSON.parse(data)
+          resolve(jsonResp)
+        } catch (error) {
+          console.error("Error parsing data: " + data)
+          console.error("Error parsing data for path: " + path)
+          resolve(null)
+        }  
+       
         }else{
           resolve(null)
         }
