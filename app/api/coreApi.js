@@ -26,9 +26,12 @@ function tryCacheThenRpcApi (cache, cacheKey, cacheMaxAge, rpcApiFunction, cache
   // console.log("tryCache: " + cacheKey + ", " + cacheMaxAge);
   if (cacheConditionFunction == null) {
     cacheConditionFunction = function (obj) {
-      if (obj && obj.tx) {
-        return shouldCacheBlock(obj)
-      }
+      // if (obj && obj.tx) {
+      //   return shouldCacheBlock(obj)
+      // } else if(obj && obj.vin )
+      // {
+      //   return shouldCacheTransaction(obj)
+      // }
       return true
     }
   }
@@ -50,12 +53,11 @@ function tryCacheThenRpcApi (cache, cacheKey, cacheMaxAge, rpcApiFunction, cache
 }
 
 function shouldCacheTransaction (tx) {
-  return (tx.confirmations > 0)
+  return (tx.confirmations > 0 && tx.vin.length < 100 && tx.vout.length < 100)
 }
 
 function shouldCacheBlock (block) {
-  return false;
-  //return (block && block.tx && block.txcount < 5000 && false)
+  return (block && block.tx && block.txcount && block.txcount < 100 )
 }
 
 function getBlockchainInfo () {
@@ -379,9 +381,9 @@ function getMempoolStats () {
 }
 
 function getBlockByHeight (blockHeight) {
-  // return tryCacheThenRpcApi(blockCache, 'getBlockByHeight-' + blockHeight, 300000, function () {
-  return newApi.getBlockByHeight(blockHeight)
-  // })
+  return tryCacheThenRpcApi(blockCache, 'getBlockByHeight-' + blockHeight, 300000, function () {
+    return newApi.getBlockByHeight(blockHeight)
+   }, shouldCacheBlock)
 }
 
 function getBlocksByHeight (blockHeights) {
@@ -411,7 +413,7 @@ function getBlocksByHeight (blockHeights) {
             combinedBlocks.push(queriedBlock)
 
             if (shouldCacheBlock(queriedBlock)) {
-              //blockCache.set('getBlockByHeight-' + queriedBlock.height, queriedBlock, 300000)
+              blockCache.set('getBlockByHeight-' + queriedBlock.height, queriedBlock, 300000)
             }
             queriedBlocksCurrentIndex++
           }
@@ -440,7 +442,7 @@ function getRawTransaction (txid) {
     return newApi.getRawTransaction(txid)
   }
 
-  return tryCacheThenRpcApi(txCache, 'getRawTransaction-' + txid, 300000, rpcApiFunction, shouldCacheTransaction)
+return tryCacheThenRpcApi(txCache, 'getRawTransaction-' + txid, 300000, rpcApiFunction, shouldCacheTransaction)
 }
 
 function getAddress (address) {
@@ -559,7 +561,7 @@ function getBlockByHashWithTransactions (blockHash, txLimit, txOffset) {
         txids.push(block.tx[0])
       }
 
-      if(txOffset >= 100  && block.txcount && block.txcount > txOffset){
+      if(txOffset >= 100  && block.txcount && block.tx.length !== block.txcount && block.txcount > txOffset){
           newApi.getBlockTxIds (blockHash,txOffset - 100,txLimit).then(function (queriedTxs) {      
             block.tx = queriedTxs;
             for (var i = 0; i < queriedTxs.length; i++) {

@@ -82,80 +82,80 @@ function getBlocksByHeight(blockHeights) {
 }
 
 function getBlockByHash(blockHash) {
-  return new Promise(function(resolve, reject) {
-    getBlocksByHash([blockHash])
-      .then(function(results) {
-        if (results && results.length > 0) {
-          resolve(results[0]);
-        } else {
-          resolve(null);
-        }
-      })
-      .catch(function(err) {
-        reject(err);
-      });
-  });
+	return new Promise(function(resolve, reject) {
+		getBlocksByHash([blockHash])
+		.then(function(results) {
+			if (results && results.length > 0) {
+				resolve(results[0]);
+			} else {
+				resolve(null);
+			}
+		})
+		.catch(function(err) {
+			reject(err);
+		});
+	});
 }
 
 function getBlocksByHash(blockHashes) {
-  console.log("rpc.getBlocksByHash: " + blockHashes);
+	console.log("rpc.getBlocksByHash: " + blockHashes);
 
-  return new Promise(function(resolve, reject) {
-    var batch = [];
-    for (var i = 0; i < blockHashes.length; i++) {
-      batch.push({
-        method: "getblock",
-        parameters: [blockHashes[i]]
-      });
-    }
+	return new Promise(function(resolve, reject) {
+		var batch = [];
+		for (var i = 0; i < blockHashes.length; i++) {
+			batch.push({
+				method: 'getblock',
+				parameters: [ blockHashes[i] ]
+			});
+		}
 
-    var blocks = [];
-    client.command(batch).then(responses => {
-      responses.forEach(item => {
-        if (item.tx) {
-          blocks.push(item);
-        }
-      });
+		var blocks = [];
+		client.command(batch).then(responses => {
+			responses.forEach(item => {
+				if (item.tx) {
+					blocks.push(item);
+				}
+			});
 
-      var coinbaseTxids = [];
-      for (var i = 0; i < blocks.length; i++) {
-        coinbaseTxids.push(blocks[i].tx[0]);
-      }
+			var coinbaseTxids = [];
+			for (var i = 0; i < blocks.length; i++) {
+				coinbaseTxids.push(blocks[i].tx[0]);
+			}
 
-      getRawTransactions(coinbaseTxids).then(function(coinbaseTxs) {
-        for (var i = 0; i < blocks.length; i++) {
-          blocks[i].coinbaseTx = coinbaseTxs[i];
-          blocks[i].totalFees = utils.getBlockTotalFeesFromCoinbaseTxAndBlockHeight(
-            coinbaseTxs[i],
-            blocks[i].height
-          );
-          blocks[i].miner = utils.getMinerFromCoinbaseTx(coinbaseTxs[i]);
-        }
+			getRawTransactions(coinbaseTxids).then(function(coinbaseTxs) {
+				for (var i = 0; i < blocks.length; i++) {
+					blocks[i].coinbaseTx = coinbaseTxs[i];
+					blocks[i].totalFees = utils.getBlockTotalFeesFromCoinbaseTxAndBlockHeight(
+						coinbaseTxs[i], 
+						blocks[i].height
+						);
+					blocks[i].miner = utils.getMinerFromCoinbaseTx(coinbaseTxs[i]);
+				}
 
-        resolve(blocks);
-      });
-    });
-  });
+				resolve(blocks);
+			});
+		});
+	});
 }
 
 function getRawTransaction(txid) {
-  return new Promise(function(resolve, reject) {
-    getRawTransactions([txid])
-      .then(function(results) {
-        if (results && results.length > 0) {
-          if (results[0].txid) {
-            resolve(results[0]);
-          } else {
-            resolve(null);
-          }
-        } else {
-          resolve(null);
-        }
-      })
-      .catch(function(err) {
-        reject(err);
-      });
-  });
+	return new Promise(function(resolve, reject) {
+		getRawTransactions([txid])
+		.then(function(results) {
+			if (results && results.length > 0) {
+				if (results[0].txid) {
+					resolve(results[0]);
+				} else {
+					resolve(null);
+				}
+			} else {
+				resolve(null);
+			}
+		})
+		.catch(function(err) {
+			reject(err);
+		});
+	});
 }
 
 function getAddress(address) {
@@ -327,31 +327,31 @@ function getRpcMethodHelp(methodName) {
 }
 
 function getRpcData(cmd) {
-  return new Promise(function(resolve, reject) {
-    client.command(cmd, function(err, result, resHeaders) {
-      if (err) {
-        console.log("Error for RPC command '" + cmd + "': " + err);
+	return new Promise(function(resolve, reject) {
+		client.command(cmd, function(err, result, resHeaders) {
+			if (err) {
+				console.log("Error for RPC command '" + cmd + "': " + err);
 
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
+				reject(err);
+			} else {
+				resolve(result);
+			}
+		});
+	});
 }
 
 function getRpcDataWithParams(cmd, params) {
-  return new Promise(function(resolve, reject) {
-    client.command(cmd, params, function(err, result, resHeaders) {
-      if (err) {
-        console.log("Error for RPC command '" + cmd + "': " + err);
+	return new Promise(function(resolve, reject) {
+		client.command(cmd, params, function(err, result, resHeaders) {
+			if (err) {
+				console.log("Error for RPC command '" + cmd + "': " + err);
 
-        reject(err);
-      } else {
-        resolve(result);
-      }
-    });
-  });
+				reject(err);
+			} else {
+				resolve(result);
+			}
+		});
+	});
 }
 
 function executeBatchesSequentially(batches, resultFunc) {
