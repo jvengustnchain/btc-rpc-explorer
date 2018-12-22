@@ -18,10 +18,12 @@ function getBlockByHash (blockHash) {
         data += chunk
       })
       resp.on('end', () => {
-        if (data) {
+        if(data.length > 0 ){
           var jsonResp = JSON.parse(data)
           resolve(jsonResp)
-        }
+          }else{
+            resolve(null)
+          }
       })
     }).on('error', (err) => {
       console.log('Error: ' + err.message)
@@ -40,8 +42,12 @@ function getBlockByHeight (height) {
         data += chunk
       })
       resp.on('end', () => {
-        var jsonResp = JSON.parse(data)
-        resolve(jsonResp)
+        if(data.length > 0 ){
+          var jsonResp = JSON.parse(data)
+          resolve(jsonResp)
+          }else{
+            resolve(null)
+          }
       })
     }).on('error', (err) => {
       console.log('Error: ' + err.message)
@@ -83,8 +89,12 @@ function getFromApiServer (path) {
 
       // The whole response has been received. Print out the result.
       resp.on('end', () => {
+        if(data.length > 0 ){
         var jsonResp = JSON.parse(data)
         resolve(jsonResp)
+        }else{
+          resolve(null)
+        }
       })
     }).on('error', (err) => {
       console.log('Error: ' + err.message)
