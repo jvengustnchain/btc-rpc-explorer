@@ -463,7 +463,7 @@ function getRawTransactions (txids) {
       txsByIndex[i] = txI
     }
   }
-
+  console.log('getRawTransactions txidsNotInCache.length:', txidsNotInCache.length)
   return new Promise(function (resolve, reject) {
     var combinedTxs = []
     if (txidsNotInCache.length > 0) {
