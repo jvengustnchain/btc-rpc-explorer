@@ -561,7 +561,7 @@ function getBlockByHashWithTransactions (blockHash, txLimit, txOffset) {
       }
 
       if (txOffset >= 100 && block.txcount && block.tx.length !== block.txcount && block.txcount > txOffset) {
-        newApi.getBlockTxIds(blockHash, txOffset - 100, txLimit).then(function (queriedTxs) {
+        newApi.getBlockTxIds(blockHash, txOffset, txLimit).then(function (queriedTxs) {
           block.tx = queriedTxs
           for (var i = 0; i < queriedTxs.length; i++) {
             txids.push(block.tx[i])
