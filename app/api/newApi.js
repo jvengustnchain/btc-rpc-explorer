@@ -114,42 +114,7 @@ function postToApiServer (path, jsonString) {
   }
 
   return rp(options)
-  // .then(function (parsedBody) {
-  //   console.log(parsedBody)
-  // })
-  // .catch(function (err) {
-  //   console.log(err)
-  // })
 }
-
-// return new Promise((resolve, reject) => {
-//   http.get(getServiceURL() + path, (resp) => {
-//     let data = ''
-//     // A chunk of data has been recieved.
-//     resp.on('data', (chunk) => {
-//       data += chunk
-//     })
-
-//     // The whole response has been received. Print out the result.
-//     resp.on('end', () => {
-//       if (data && data.length > 0) {
-//         try {
-//           var jsonResp = JSON.parse(data)
-//           resolve(jsonResp)
-//         } catch (error) {
-//           console.error('Error parsing data: ' + data)
-//           console.error('Error parsing data for path: ' + path)
-//           resolve(null)
-//         }
-//       } else {
-//         resolve(null)
-//       }
-//     })
-//   }).on('error', (err) => {
-//     console.log('Error: ' + err.message)
-//     reject(err)
-//   })
-// })
 
 module.exports = {
   getBlockByHash: getBlockByHash,
