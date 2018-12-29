@@ -651,14 +651,11 @@ router.get("/address/:address", function(req, res) {
 						res.locals.addrGainsByTx = addrGainsByTx;
 						res.locals.addrLossesByTx = addrLossesByTx;
 
-						for (var i = 0; i < rawTxResult.transactions.length; i++) {
-							var tx = rawTxResult.transactions[i];
 
-							if(tx.disableMoreDetails === true){
-								res.locals.disbaleTxDetails = true
-								break;
-							}
+						if(rawTxResult.disableMoreDetails){
+							res.locals.disableTxDetails = true
 						}
+
 						if(!res.locals.disbaleTxDetails){
 							for (var i = 0; i < rawTxResult.transactions.length; i++) {
 								var tx = rawTxResult.transactions[i];

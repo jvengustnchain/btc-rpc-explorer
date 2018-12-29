@@ -517,9 +517,8 @@ function getRawTransactionsWithInputs (txids, maxInputs = -1) {
 
         if (transaction && transaction.vin ) {
           
-          if(maxInputs > 0 && transaction.vin.length > config.site.addressTxMaxInOutDetails  || transaction.vout.length > config.site.addressTxMaxInOutDetails) {
-            transactions[i].disableMoreDetails = true;
-            resolve({ transactions: transactions, txInputsByTransaction: {} })
+          if(transaction.vin.length > config.site.addressTxMaxInOutDetails  || transaction.vout.length > config.site.addressTxMaxInOutDetails) {
+            resolve({ transactions: transactions, txInputsByTransaction: {}, disableMoreDetails: true })
             return;
           }
 
