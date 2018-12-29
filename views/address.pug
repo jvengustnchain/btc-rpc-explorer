@@ -324,7 +324,7 @@ block content
 															span(class="text-danger") Unconfirmed
 
 												div(class="col")
-													if (addrGainsByTx[tx.txid])
+													if (!disableTxDetails && addrGainsByTx[tx.txid])
 														- var currencyValue = addrGainsByTx[tx.txid];
 														span(class="text-success") +
 															include includes/value-display.pug
@@ -332,7 +332,7 @@ block content
 														if (addrLossesByTx[tx.txid])
 															span  / 
 
-													if (addrLossesByTx[tx.txid])
+													if (!disableTxDetails && addrLossesByTx[tx.txid])
 														- var currencyValue = addrLossesByTx[tx.txid];
 														span(class="text-danger") -
 															include includes/value-display.pug
