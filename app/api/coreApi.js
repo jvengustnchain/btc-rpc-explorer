@@ -503,7 +503,7 @@ function getRawTransactionsWithInputs (txids, maxInputs = -1) {
 
   return new Promise(function (resolve, reject) {
     getRawTransactions(txids).then(function (transactions) {
-      var maxInputsTracked = config.site.txMaxInput
+      var maxInputsTracked = config.site.addressTxMaxInOutDetails
 
       if (maxInputs <= 0) {
         maxInputsTracked = 1000000
@@ -515,7 +515,14 @@ function getRawTransactionsWithInputs (txids, maxInputs = -1) {
       for (var i = 0; i < transactions.length; i++) {
         var transaction = transactions[i]
 
-        if (transaction && transaction.vin) {
+        if (transaction && transaction.vin ) {
+          
+          if(maxInputs > 0 && transaction.vin.length > config.site.addressTxMaxInOutDetails  || transaction.vout.length > config.site.addressTxMaxInOutDetails) {
+            transactions[i].disableMoreDetails = true;
+            resolve({ transactions: transactions, txInputsByTransaction: {} })
+            return;
+          }
+
           for (var j = 0; j < Math.min(maxInputsTracked, transaction.vin.length); j++) {
             if (transaction.vin[j].txid) {
               vinTxids.push(transaction.vin[j].txid)

@@ -91,7 +91,8 @@ module.exports = {
     blockTxPageSize: 10,
     addressTxPageSize: 5,
     txMaxInput: 10,
-    browseBlocksPageSize: 20
+    browseBlocksPageSize: 20,
+    addressTxMaxInOutDetails: 10
   },
 
   credentials: credentials,

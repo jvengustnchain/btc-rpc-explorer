@@ -338,7 +338,7 @@ block content
 															include includes/value-display.pug
 													
 										div(class="card-body")
-											if (true)
+											if (!disbaleTxDetails)
 												- var txInputs = txInputsByTransaction[tx.txid];
 												- var blockHeight = blockHeightsByTxid[tx.txid];
 
