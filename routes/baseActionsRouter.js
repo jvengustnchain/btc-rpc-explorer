@@ -656,7 +656,7 @@ router.get("/address/:address", function(req, res) {
 							res.locals.disableTxDetails = true
 						}
 
-						if(!res.locals.disbaleTxDetails){
+						if(!res.locals.disableTxDetails){
 							for (var i = 0; i < rawTxResult.transactions.length; i++) {
 								var tx = rawTxResult.transactions[i];
 								var txInputs = rawTxResult.txInputsByTransaction[tx.txid];
