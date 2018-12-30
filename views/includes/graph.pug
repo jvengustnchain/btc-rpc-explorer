@@ -12,13 +12,13 @@ div(id='viz')
 
         for(var i=0;i<=blocks.length-3;i++) { 
             if(blocks[i].miner && blocks[i].miner.name){
-                g.setNode(i,  { label: '#'+blocks[i].height + '\n' + blocks[i].miner.name, class: "type-S" });
+                g.setNode(i,  { labelType: "html", label: "<a href=https://whatsonchain.com/block-height/"+ blocks[i].height +" target='_blank' >"+ "#" + blocks[i].height +"</a>" +'<br>'+ blocks[i].miner.name});
              }
              else if (blocks[i].miner){
-                g.setNode(i,  { label: '#'+blocks[i].height + '\n' + blocks[i].miner.substring(0, 3)+"...", class: "type-S" });
+                g.setNode(i,  { labelType: "html", label: "<a href=https://whatsonchain.com/block-height/"+ blocks[i].height +" target='_blank'>"+ "#" + blocks[i].height +"</a>" +'<br>'  + blocks[i].miner.substring(0, 8)+"..."});
              }
              else{             
-                g.setNode(i,  { label: '#'+blocks[i].height + '\n' + 'Unknown', class: "type-S" }); 
+                g.setNode(i,  { labelType: "html", label: "<a href=https://whatsonchain.com/block-height/"+ blocks[i].height +" target='_blank'>"+ "#" + blocks[i].height +"</a>" +'<br>' +  'Unknown' }); 
              }
          }
 
@@ -28,7 +28,8 @@ div(id='viz')
         var node = g.node(v);
         // Round the corners of the nodes
         node.rx = node.ry = 5;
-        
+        node.height = 30;
+
         if(node.id === 999){
                 node.shape = "img";
         }
@@ -65,11 +66,7 @@ div(id='viz')
             svg.selectAll("g.node").on("click", function(id) 
             { 
                 var _node = g.node(id);
-                if(id != 999) 
-                {
-                    window.open("https://whatsonchain.com/block-height/"+parseInt(_node.label.replace(/[^0-9\.]/g, ''), 10),'_blank');
-                }
-                else
+                if(id == 999) 
                 {
                     window.open("https://bitcoinsv.io",'_blank');
                 }
@@ -95,3 +92,9 @@ div(id='viz')
         var xCenterOffset = (g.graph().width);
         svgGroup.attr("transform", "translate(" + 30 + ", 20)");
         svg.attr("height", g.graph().height + 40);        
+
+//- div(class="col" style="float: left;")
+//-         a(href="/blocks")
+//-             i(class="fas fa-cubes")
+//-             span  Browse Blocks &raquo;
+        
