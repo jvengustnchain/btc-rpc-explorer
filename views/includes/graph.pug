@@ -51,14 +51,14 @@ div(class="vizOuter")
                 minerSpan = document.createElementNS('http://www.w3.org/2000/svg','tspan');
                 minerSpan.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
                 minerSpan.setAttribute('dy', '1em');
-                minerSpan.setAttribute('x', '3');
+                minerSpan.setAttribute('x', '2');
                 minerSpan.setAttribute('y', '20');
    
 
                 if(blocks[i].miner && blocks[i].miner.name){
                     minerSpan.textContent = blocks[i].miner.name;
                 } else if (blocks[i].miner){
-                    minerSpan.textContent = blocks[i].miner.substring(0, 5);
+                    minerSpan.textContent = blocks[i].miner.substring(0, 10);
                 } else{
                     minerSpan.textContent = 'unknown';
                 }
