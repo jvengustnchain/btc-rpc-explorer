@@ -10,17 +10,61 @@ div(class="vizOuter")
                 .setGraph({})
                 .setDefaultEdgeLabel(function() { return {}; });
                 g.graph().rankDir = 'RL';
-                        
-            for(var i=0;i<=blocks.length-3;i++) { 
+
+            //Node "more..." node 
+            svg_label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            
+            //height span
+            linkspan = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+            linkspan.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
+            linkspan.setAttribute('dy', '1em');
+            linkspan.setAttribute('x', '1');
+            linkspan.setAttribute('fill', 'blue');
+            link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+            link.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', 'https://whatsonchain.com/blocks');
+            link.setAttribute('target', '_blank');
+            link.textContent = 'Click here to explore more blocks....';
+            linkspan.appendChild(link);
+            svg_label.appendChild(linkspan);
+
+            g.setNode(998,  { label: svg_label, labelType: 'svg' });
+
+
+            for(var i=0;i<=blocks.length-1;i++) { 
+
+                svg_label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                
+                //height span
+                linkspan = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+                linkspan.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
+                linkspan.setAttribute('dy', '1em');
+                linkspan.setAttribute('x', '1');
+                linkspan.setAttribute('fill', 'blue');
+                link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
+                link.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', 'https://whatsonchain.com/block-height/'+ blocks[i].height);
+                link.setAttribute('target', '_blank');
+                link.textContent = "#" + blocks[i].height;
+                linkspan.appendChild(link);
+                svg_label.appendChild(linkspan);
+                
+                //miner span
+                minerSpan = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+                minerSpan.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
+                minerSpan.setAttribute('dy', '1em');
+                minerSpan.setAttribute('x', '3');
+                minerSpan.setAttribute('y', '20');
+   
+
                 if(blocks[i].miner && blocks[i].miner.name){
-                    g.setNode(i,  { labelType: "html", label: "<div class='vizNode''><a href=https://whatsonchain.com/block-height/"+ blocks[i].height +" target='_blank' >"+ "#" + blocks[i].height +"</a>" +'</br>'  + blocks[i].miner.name +"</div>"});
+                    minerSpan.textContent = blocks[i].miner.name;
+                } else if (blocks[i].miner){
+                    minerSpan.textContent = blocks[i].miner.substring(0, 5);
+                } else{
+                    minerSpan.textContent = 'unknown';
                 }
-                else if (blocks[i].miner){
-                    g.setNode(i,  { labelType: "html", label: "<div class='vizNode'><a href=https://whatsonchain.com/block-height/"+ blocks[i].height +" target='_blank'>"+ "#" + blocks[i].height +"</a>" +'</br>'  + blocks[i].miner.substring(0, 5)+"..." +"</div>"});
-                }
-                else{             
-                    g.setNode(i,  { labelType: "html", label: "<div class='vizNode'><a href=https://whatsonchain.com/block-height/"+ blocks[i].height +" target='_blank'>"+ "#" + blocks[i].height +"</a>" +'</br>' +  'Unknown'+"</div>" }); 
-                }
+                 
+                svg_label.appendChild(minerSpan);
+                g.setNode(i,  { label: svg_label, labelType: 'svg' });
             }
 
             g.setNode(999,  {label: '', shape:"img" }); //Alpha node
@@ -29,26 +73,22 @@ div(class="vizOuter")
             var node = g.node(v);
             // Round the corners of the nodes
             node.rx = node.ry = 5;
-            if( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-            //-  node.height = 30;
-            //-  node.width = 30;
-            } else {
-                node.height = 30;
-            }
 
-            if(node.id === 999) {
-                    node.shape = "img";
-            }
+            //- if(node.id === 999) {
+            //-         node.shape = "img";
+            //- }
             
             });
             
 
 
-            for(var i=0 ;i<blocks.length-3;i++) {
+            for(var i=0 ;i<blocks.length-1;i++) {
                     g.setEdge(i+1, i); 
             }
 
-            g.setEdge(0, 999); 
+            g.setEdge(0, 999);
+            g.setEdge(998, blocks.length-1); 
+ 
             
             // Create the renderer
             var render = new dagreD3.render();

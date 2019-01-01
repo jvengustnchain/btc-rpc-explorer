@@ -286,7 +286,6 @@ text {
    fill: #edad23;
    stroke-width: 1.5px;
   }
-  @media (max-width: 1200px) {
     /* CSS goes here */
 
 	.vizOuter {
@@ -294,20 +293,14 @@ text {
 		overflow: auto;
 	}
 	.vizInner {
-		width: 600%;
+		width: 350%;
 	}
 	
-	 .vizNode {
+	 /* .vizNode {
 		margin-top: 0px;
 		margin-bottom: -10px;
 		margin-left: 0px;
 		margin-right: -5px;
-		/* width: 5%;
-		height: 10%; */
-		/* display: grid; */
-		/* grid-auto-columns: 100%; */
-		/* grid-auto-rows: 10% 10%; */
-		/* font: 0.05em 'Courier New', Courier, monospace; */
-		/* color: rgb(183, 143, 221); */
-	} 
-}
+		height: 10%; 
+
+	}  */
