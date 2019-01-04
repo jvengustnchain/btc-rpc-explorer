@@ -6,13 +6,19 @@ block headContent
 		.field {
 			word-wrap: break-word;
 		}
-		
+	
 
 block content
 	if (result && result.getrawtransaction)
 		h1(class="h3 word-wrap") Transaction 
 			br
 			small(class="monospace") #{txid}
+			button(type="button", data-clipboard-action="copy", class="btn woc_copy", data-clipboard-text=txid , data-toggle="tooltip", title="Copy hash" ) 
+				span(class="fas fa-copy")
+				
+			button(type="button", data-clipboard-action="copy", class="btn woc_copy", data-clipboard-text="https://whatsonchain.com/tx/"+txid, data-toggle="tooltip", title="Copy link" ) 
+				span(class="fas fa-link")
+
 		hr
 
 		ul(class='nav nav-tabs mb-3')
@@ -294,4 +300,5 @@ block content
 
 				//pre #{JSON.stringify(result.txInputs, null, 4)}
 
-		
+	script
+			include ../public/scripts/clipboard.js		
