@@ -14,11 +14,11 @@ block content
 			br
 			small(class="monospace") #{txid}
 			
-			a(href="" class="btn btn-m btn-default woc_copy", data-clipboard-text=txid , data-toggle="tooltip", title="Copy hash")
-				span(class="fas fa-copy")
+			button(type="button", class="btn btn-m btn-default woc-copy", data-clipboard-text=txid , data-toggle="tooltip", title="Copy hash")
+				i(class="fas fa-copy")
 
-			a(href="" class="btn btn-m btn-default woc_copy" , data-clipboard-text="https://whatsonchain.com/tx/"+txid, data-toggle="tooltip", title="Copy link" )
-				span(class="fas fa-link")
+			button(type="button", class="btn btn-m btn-default woc-copy" , data-clipboard-text="https://whatsonchain.com/tx/"+txid, data-toggle="tooltip", title="Copy link" )
+				i(class="fas fa-link")
 
 		hr
 

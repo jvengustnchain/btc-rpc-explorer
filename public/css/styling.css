@@ -295,19 +295,31 @@ text {
   }
     /* CSS goes here */
 
-	.vizOuter {
-		width: 100%;
-		overflow: auto;
-	}
-	.vizInner {
-		width: 500%;
-	}
+.vizOuter {
+	width: 100%;
+	overflow: auto;
+}
+.vizInner {
+	width: 500%;
+}
 	
-	 /* .vizNode {
-		margin-top: 0px;
-		margin-bottom: -10px;
-		margin-left: 0px;
-		margin-right: -5px;
-		height: 10%; 
+/* .vizNode {
+margin-top: 0px;
+margin-bottom: -10px;
+margin-left: 0px;
+margin-right: -5px;
+height: 10%; 
 
-	}  */
+}  */
+
+.woc-copy{
+	margin: 1px;
+	border: none; /* Remove borders */
+	cursor: pointer; /* Mouse pointer on hover */
+	background-color:transparent
+}
+
+.woc-copy:hover {
+background-color:gold;
+border-radius: 3px;
+}

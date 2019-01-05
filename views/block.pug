@@ -9,11 +9,11 @@ block content
 		br
 		small(style="width: 100%;", class="monospace word-wrap") #{result.getblock.hash}
 		
-		a(href="" class="btn btn-sm btn-default woc_copy", data-clipboard-text=result.getblock.hash , data-toggle="tooltip", title="Copy hash")
-			span(class="fas fa-copy")
+		button(type="button", class="btn btn-sm btn-default woc-copy", data-clipboard-text=result.getblock.hash , data-toggle="tooltip", title="Copy hash")
+			i(class="fas fa-copy")
 
-		a(href="" class="btn btn-sm btn-default woc_copy" , data-clipboard-text="https://whatsonchain.com/block/"+result.getblock.hash, data-toggle="tooltip", title="Copy link" )
-			span(class="fas fa-link")
+		button(type="button", class="btn btn-sm btn-default woc-copy" , data-clipboard-text="https://whatsonchain.com/block/"+result.getblock.hash, data-toggle="tooltip", title="Copy link" )
+			i(class="fas fa-link")
 	
 		
 		script
