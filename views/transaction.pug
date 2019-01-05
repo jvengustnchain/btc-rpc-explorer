@@ -13,10 +13,11 @@ block content
 		h1(class="h3 word-wrap") Transaction 
 			br
 			small(class="monospace") #{txid}
-			button(type="button", data-clipboard-action="copy", class="btn woc_copy", data-clipboard-text=txid , data-toggle="tooltip", title="Copy hash" ) 
+			
+			a(href="" class="btn btn-m btn-default woc_copy", data-clipboard-text=txid , data-toggle="tooltip", title="Copy hash")
 				span(class="fas fa-copy")
-				
-			button(type="button", data-clipboard-action="copy", class="btn woc_copy", data-clipboard-text="https://whatsonchain.com/tx/"+txid, data-toggle="tooltip", title="Copy link" ) 
+
+			a(href="" class="btn btn-m btn-default woc_copy" , data-clipboard-text="https://whatsonchain.com/tx/"+txid, data-toggle="tooltip", title="Copy link" )
 				span(class="fas fa-link")
 
 		hr
