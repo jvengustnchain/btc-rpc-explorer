@@ -34,6 +34,7 @@ module.exports = {
 	ticker:"BSV",
 	logoUrl:"/img/logo/bsv.png",
 	siteTitle:"WhatsOnChain.com",
+	siteLogo:"/img/logo/WOC-GY-10.png",
 	pageTitle: "BSV Explorer",
 	siteDescriptionHtml:"<b>whatsonchain.com - Bitcoin SV Blockchain Explorer</b> is <a href='whatsonchain.com).",
 	nodeTitle:"Bitcoin SV Full Node",
