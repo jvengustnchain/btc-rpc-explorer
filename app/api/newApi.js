@@ -72,7 +72,7 @@ function getBlocksByHeight (heights) {
 
 function getBlocksByHash (hashes) {
   console.log('trying to get blocks from new api!')
-  return postToApiServer('getblocks', {hashes: hashes}).then(blocks)
+  return postToApiServer('getblocks', {hashes: hashes})
 }
 
 
