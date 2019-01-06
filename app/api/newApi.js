@@ -61,9 +61,20 @@ function getRawTransaction (txid) {
 
 function getRawTransactions (txids) {
   console.log('trying to get rawtransactions from new api!')
-  // return getFromApiServer('gettransactions/' + txids)
-  return postToApiServer('gettransactions2', txids)
+  return postToApiServer('gettransactions2', {txids: txids})
 }
+
+function getBlocksByHeight (heights) {
+  console.log('trying to get blocksbyHeight from new api!')
+  return postToApiServer('getblocksbyheight', {heights: heights})
+
+}
+
+function getBlocksByHash (hashes) {
+  console.log('trying to get blocks from new api!')
+  return postToApiServer('getblocks', {hashes: hashes}).then(blocks)
+}
+
 
 // getBlockByHashWithTransactions
 function getBlockTxIds (blockHash, offset, limit) {
@@ -107,18 +118,21 @@ function postToApiServer (path, jsonString) {
   var options = {
     method: 'POST',
     uri: getServiceURL() + path,
-    body: {
-      txids: jsonString
-    },
+    body: jsonString,
     json: true // Automatically stringifies the body to JSON
   }
 
   return rp(options)
 }
 
+
+
+
 module.exports = {
   getBlockByHash: getBlockByHash,
+  getBlocksByHash:getBlocksByHash,
   getBlockByHeight: getBlockByHeight,
+  getBlocksByHeight: getBlocksByHeight,
   getRawTransaction: getRawTransaction,
   getRawTransactions: getRawTransactions,
   getBlockTxIds: getBlockTxIds

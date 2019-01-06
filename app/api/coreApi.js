@@ -402,7 +402,7 @@ function getBlocksByHeight (blockHeights) {
   return new Promise(function (resolve, reject) {
     var combinedBlocks = []
     if (blockHeightsNotInCache.length > 0) {
-      rpcApi.getBlocksByHeight(blockHeightsNotInCache).then(function (queriedBlocks) {
+      newApi.getBlocksByHeight(blockHeightsNotInCache).then(function (queriedBlocks) {
         var queriedBlocksCurrentIndex = 0
         for (var i = 0; i < blockHeights.length; i++) {
           if (blocksByIndex.hasOwnProperty(i)) {
