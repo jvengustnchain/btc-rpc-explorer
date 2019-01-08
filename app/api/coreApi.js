@@ -515,11 +515,10 @@ function getRawTransactionsWithInputs (txids, maxInputs = -1) {
       for (var i = 0; i < transactions.length; i++) {
         var transaction = transactions[i]
 
-        if (transaction && transaction.vin ) {
-          
-          if(transaction.vin.length > config.site.addressTxMaxInOutDetails  || transaction.vout.length > config.site.addressTxMaxInOutDetails) {
+        if (transaction && transaction.vin) {
+          if (transaction.vin.length > config.site.addressTxMaxInOutDetails || transaction.vout.length > config.site.addressTxMaxInOutDetails) {
             resolve({ transactions: transactions, txInputsByTransaction: {}, disableMoreDetails: true })
-            return;
+            return
           }
 
           for (var j = 0; j < Math.min(maxInputsTracked, transaction.vin.length); j++) {
