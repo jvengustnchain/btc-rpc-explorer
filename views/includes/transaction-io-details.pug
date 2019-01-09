@@ -108,7 +108,7 @@ div(class="row monospace")
 									else if (vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
 										span(class="monospace") OP_RETURN: 
 										
-										- var opReturn = utils.getOpReturnTags(vout.scriptPubKey.asm); 
+										- var opReturn = vout.scriptPubKey.opReturn; 
 										if(opReturn && opReturn.tag)
 											span(class="monospace") #{vout.scriptPubKey.asm.substring("OP_RETURN ".length)}
 

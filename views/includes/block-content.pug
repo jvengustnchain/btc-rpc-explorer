@@ -234,15 +234,18 @@ div(class="tab-content")
 								
 								if(tx.vout)
 									each vout, voutIndex in tx.vout
-										if (vout && vout.scriptPubKey && vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN '))
-											- var opReturn = utils.getOpReturnTags(vout.scriptPubKey.asm); 
-											if(opReturn.tag == "memo.cash")
-												span(class="tag-memo") #{opReturn.tag}
-												span(class="tag-memo") #{opReturn.action}
-											else if (opReturn.tag == "yours.org")
-												span(class="tag-yours") #{opReturn.tag}
+										if (vout && vout.scriptPubKey && vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN ') && vout.scriptPubKey.opReturn)
+											if(vout.scriptPubKey.opReturn.type == "MemoCash")
+												span(class="tag-memo") #{vout.scriptPubKey.opReturn.type}
+												span(class="tag-memo") #{vout.scriptPubKey.opReturn.action}
+											else if (vout.scriptPubKey.opReturn.type == "Tokenized")
+												span(class="tag-tokenized") #{vout.scriptPubKey.opReturn.type}
+												span(class="tag-tokenized") #{vout.scriptPubKey.opReturn.action}
+											else if (vout.scriptPubKey.opReturn.type == "yours.org")
+												span(class="tag-yours") #{vout.scriptPubKey.opReturn.type}
 											else		
 												span(class="tag") "OP_RETURN"
+										
 
 						div(class="card-body collapse " role="tabpanel" id=tx.txid)
 							//pre
