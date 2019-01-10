@@ -1,0 +1,16 @@
+extends layout
+
+block headContent
+	title Broadcast Raw Transaction
+
+block content
+	h1(class="h3") Broadcast Raw Transaction
+	hr
+
+	div(class="mb-5")
+		form(method="post", action="/broadcast", class="form")
+			div(class="input-group input-group-lg")
+				textarea(type="text", cols="30", rows="10", class="form-control form-control-sm", name="query", placeholder="raw transaction", value=(query), style="width: 300px;")
+			br
+			div(class="input-group-append")
+			button(type="submit", class="btn btn-primary") Broadcast

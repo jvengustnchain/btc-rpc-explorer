@@ -281,6 +281,40 @@ router.get("/blocks", function(req, res) {
 	});
 });
 
+router.get("/broadcast", function(req, res) {
+	if (!req.body.query) {
+		// req.session.userMessage = "Enter a block height, block hash, or transaction id.";
+		// req.session.userMessageType = "primary";
+
+		res.render("broadcast");
+
+		return;
+	}
+});
+
+
+router.post("/broadcast", function(req, res) {
+	if (!req.body.query) {
+		req.session.userMessage = "Enter a block height, block hash, or transaction id.";
+
+		res.redirect("/");
+
+		return;
+	}
+
+	var query = req.body.query.toLowerCase().trim();
+	var rawCaseQuery = req.body.query.trim();
+
+	req.session.query = req.body.query;
+
+	
+});
+
+
+
+
+
+
 router.get("/search", function(req, res) {
 	if (!req.body.query) {
 		req.session.userMessage = "Enter a block height, block hash, or transaction id.";
