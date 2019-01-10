@@ -235,7 +235,7 @@ div(class="tab-content")
 								if(tx.vout)
 									each vout, voutIndex in tx.vout
 										if (vout && vout.scriptPubKey && vout.scriptPubKey.asm && vout.scriptPubKey.asm.startsWith('OP_RETURN ') && vout.scriptPubKey.opReturn)
-											if(vout.scriptPubKey.opReturn.type == "MemoCash")
+											if(vout.scriptPubKey.opReturn.type == "memo.cash")
 												span(class="tag-memo") #{vout.scriptPubKey.opReturn.type}
 												span(class="tag-memo") #{vout.scriptPubKey.opReturn.action}
 											else if (vout.scriptPubKey.opReturn.type == "Tokenized")
