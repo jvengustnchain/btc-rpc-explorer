@@ -40,19 +40,23 @@ router.get("/", function(req, res) {
 
 	promises.push(coreApi.getMempoolInfo());
 	promises.push(coreApi.getMiningInfo());
-
+        
 	var chainTxStatsIntervals = [ 144, 144 * 7, 144 * 30, 144 * 265 ];
 	res.locals.chainTxStatsLabels = [ "24 hours", "1 week", "1 month", "1 year", "All time" ];
-	for (var i = 0; i < chainTxStatsIntervals.length; i++) {
-		promises.push(coreApi.getChainTxStats(chainTxStatsIntervals[i]));
-	}
 
 	coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
 		res.locals.getblockchaininfo = getblockchaininfo;
 
 		var blockHeights = [];
 		if (getblockchaininfo.blocks) {
-			for (var i = 0; i < 10; i++) {
+                for (var i = 0; i < chainTxStatsIntervals.length; i++) {
+                             // Dont check for blockheights that exceed the current block height  
+                              if(chainTxStatsIntervals[i] < getblockchaininfo.blocks){ 
+                                     promises.push(coreApi.getChainTxStats(chainTxStatsIntervals[i]));
+                             }
+                }
+	
+		for (var i = 0; i < 10; i++) {
 				blockHeights.push(getblockchaininfo.blocks - i);
 			}
 		}
