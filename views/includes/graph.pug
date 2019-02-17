@@ -3,7 +3,7 @@ div(class="vizOuter")
     div(id='viz', class="vizInner")
         script(type="text/javascript").
 
-            var blocks = !{JSON.stringify(latestBlocks)}
+            var blocks = !{JSON.stringify(latestBlocksSummary)}
             
             // Create the input graph
             var g = new dagreD3.graphlib.Graph()

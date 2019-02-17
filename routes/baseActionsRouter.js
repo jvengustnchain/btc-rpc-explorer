@@ -1,175 +1,183 @@
-var express = require('express');
-var router = express.Router();
-var util = require('util');
-var moment = require('moment');
-var bitcoinCore = require("bitcoin-core");
-var qrcode = require('qrcode');
-var bitcoinjs = require('bitcoinjs-lib');
-var sha256 = require("crypto-js/sha256");
-var hexEnc = require("crypto-js/enc-hex");
-var Decimal = require("decimal.js");
+var express = require('express')
+var router = express.Router()
+var util = require('util')
+var moment = require('moment')
+var bitcoinCore = require('bitcoin-core')
+var qrcode = require('qrcode')
+var bitcoinjs = require('bitcoinjs-lib')
+var sha256 = require('crypto-js/sha256')
+var hexEnc = require('crypto-js/enc-hex')
+var Decimal = require('decimal.js')
 
-var utils = require('./../app/utils.js');
-var coins = require("./../app/coins.js");
-var config = require("./../app/config.js");
-var coreApi = require("./../app/api/coreApi.js");
+var utils = require('./../app/utils.js')
+var coins = require('./../app/coins.js')
+var config = require('./../app/config.js')
+var coreApi = require('./../app/api/coreApi.js')
 
-router.get("/", function(req, res) {
-	if (req.session.host == null || req.session.host.trim() == "") {
-		if (req.cookies['rpc-host']) {
-			res.locals.host = req.cookies['rpc-host'];
-		}
+router.get('/', function (req, res) {
+  if (req.session.host == null || req.session.host.trim() == '') {
+    if (req.cookies['rpc-host']) {
+      res.locals.host = req.cookies['rpc-host']
+    }
 
-		if (req.cookies['rpc-port']) {
-			res.locals.port = req.cookies['rpc-port'];
-		}
+    if (req.cookies['rpc-port']) {
+      res.locals.port = req.cookies['rpc-port']
+    }
 
-		if (req.cookies['rpc-username']) {
-			res.locals.username = req.cookies['rpc-username'];
-		}
+    if (req.cookies['rpc-username']) {
+      res.locals.username = req.cookies['rpc-username']
+    }
 
-		res.render("connect");
-		res.end();
+    res.render('connect')
+    res.end()
 
-		return;
-	}
+    return
+  }
 
-	res.locals.homepage = true;
+  res.locals.homepage = true
 
-	var promises = [];
+  var promises = []
 
-	promises.push(coreApi.getMempoolInfo());
-	promises.push(coreApi.getMiningInfo());
-        
-	var chainTxStatsIntervals = [ 144, 144 * 7, 144 * 30, 144 * 265 ];
-	res.locals.chainTxStatsLabels = [ "24 hours", "1 week", "1 month", "1 year", "All time" ];
+  promises.push(coreApi.getMempoolInfo())
+  promises.push(coreApi.getMiningInfo())
 
-	coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
-		res.locals.getblockchaininfo = getblockchaininfo;
+  var chainTxStatsIntervals = [ 144, 144 * 7, 144 * 30, 144 * 265 ]
+  res.locals.chainTxStatsLabels = [ '24 hours', '1 week', '1 month', '1 year', 'All time' ]
 
-		var blockHeights = [];
-		if (getblockchaininfo.blocks) {
-                for (var i = 0; i < chainTxStatsIntervals.length; i++) {
-                             // Dont check for blockheights that exceed the current block height  
-                              if(chainTxStatsIntervals[i] < getblockchaininfo.blocks){ 
-                                     promises.push(coreApi.getChainTxStats(chainTxStatsIntervals[i]));
-                             }
-                }
-	
-		for (var i = 0; i < 10; i++) {
-				blockHeights.push(getblockchaininfo.blocks - i);
-			}
-		}
+  coreApi.getBlockchainInfo().then(function (getblockchaininfo) {
+    res.locals.getblockchaininfo = getblockchaininfo
 
-		promises.push(coreApi.getChainTxStats(getblockchaininfo.blocks - 1));
+    var blockHeights = []
+    if (getblockchaininfo.blocks) {
+      for (var i = 0; i < chainTxStatsIntervals.length; i++) {
+        // Dont check for blockheights that exceed the current block height
+        if (chainTxStatsIntervals[i] < getblockchaininfo.blocks) {
+          promises.push(coreApi.getChainTxStats(chainTxStatsIntervals[i]))
+        }
+      }
 
-		coreApi.getBlocksByHeight(blockHeights).then(function(latestBlocks) {
-			res.locals.latestBlocks = latestBlocks;
+      for (var i = 0; i < 10; i++) {
+        blockHeights.push(getblockchaininfo.blocks - i)
+      }
+    }
 
-			Promise.all(promises).then(function(promiseResults) {
-				res.locals.mempoolInfo = promiseResults[0];
-				res.locals.miningInfo = promiseResults[1];
+    promises.push(coreApi.getChainTxStats(getblockchaininfo.blocks - 1))
 
-				var chainTxStats = [];
-				for (var i = 0; i < res.locals.chainTxStatsLabels.length; i++) {
-					chainTxStats.push(promiseResults[i + 2]);
-				}
+    coreApi.getBlocksByHeight(blockHeights).then(function (latestBlocks) {
+      res.locals.latestBlocks = latestBlocks
+      res.locals.latestBlocksSummary = latestBlocks.map(function (block) {
+        return {
+          'size': block.size,
+          'time': block.time,
+          'height': block.height,
+          'miner': block.miner
 
-				res.locals.chainTxStats = chainTxStats;
+        }
+      })
 
-				res.render("index");
-			});
-		});
-	}).catch(function(err) {
-		res.locals.userMessage = "Error loading recent blocks: " + err;
+      Promise.all(promises).then(function (promiseResults) {
+        res.locals.mempoolInfo = promiseResults[0]
+        res.locals.miningInfo = promiseResults[1]
 
-		res.render("index");
-	});
-});
+        // var chainTxStats = [];
+        // for (var i = 0; i < res.locals.chainTxStatsLabels.length; i++) {
+        // 	chainTxStats.push(promiseResults[i + 2]);
+        // }
 
-router.get("/node-status", function(req, res) {
-	coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
-		res.locals.getblockchaininfo = getblockchaininfo;
+        // res.locals.chainTxStats = chainTxStats;
 
-		coreApi.getNetworkInfo().then(function(getnetworkinfo) {
-			res.locals.getnetworkinfo = getnetworkinfo;
+        res.render('index')
+      })
+    })
+  }).catch(function (err) {
+    res.locals.userMessage = 'Error loading recent blocks: ' + err
 
-			coreApi.getUptimeSeconds().then(function(uptimeSeconds) {
-				res.locals.uptimeSeconds = uptimeSeconds;
+    res.render('index')
+  })
+})
 
-				coreApi.getNetTotals().then(function(getnettotals) {
-					res.locals.getnettotals = getnettotals;
+router.get('/node-status', function (req, res) {
+  coreApi.getBlockchainInfo().then(function (getblockchaininfo) {
+    res.locals.getblockchaininfo = getblockchaininfo
 
-					res.render("node-status");
+    coreApi.getNetworkInfo().then(function (getnetworkinfo) {
+      res.locals.getnetworkinfo = getnetworkinfo
 
-				}).catch(function(err) {
-					res.locals.userMessage = "Error getting node status: (id=0), err=" + err;
+      coreApi.getUptimeSeconds().then(function (uptimeSeconds) {
+        res.locals.uptimeSeconds = uptimeSeconds
 
-					res.render("node-status");
-				});
-			}).catch(function(err) {
-				res.locals.userMessage = "Error getting node status: (id=1), err=" + err;
+        coreApi.getNetTotals().then(function (getnettotals) {
+          res.locals.getnettotals = getnettotals
 
-				res.render("node-status");
-			});
-		}).catch(function(err) {
-			res.locals.userMessage = "Error getting node status: (id=2), err=" + err;
+          res.render('node-status')
+        }).catch(function (err) {
+          res.locals.userMessage = 'Error getting node status: (id=0), err=' + err
 
-			res.render("node-status");
-		});
-	}).catch(function(err) {
-		res.locals.userMessage = "Error getting node status: (id=3), err=" + err;
+          res.render('node-status')
+        })
+      }).catch(function (err) {
+        res.locals.userMessage = 'Error getting node status: (id=1), err=' + err
 
-		res.render("node-status");
-	});
-});
+        res.render('node-status')
+      })
+    }).catch(function (err) {
+      res.locals.userMessage = 'Error getting node status: (id=2), err=' + err
 
-router.get("/mempool-summary", function(req, res) {
-	coreApi.getMempoolInfo().then(function(getmempoolinfo) {
-		res.locals.getmempoolinfo = getmempoolinfo;
+      res.render('node-status')
+    })
+  }).catch(function (err) {
+    res.locals.userMessage = 'Error getting node status: (id=3), err=' + err
 
-		coreApi.getMempoolStats().then(function(mempoolstats) {
-			res.locals.mempoolstats = mempoolstats;
+    res.render('node-status')
+  })
+})
 
-			res.render("mempool-summary");
-		});
-	}).catch(function(err) {
-		res.locals.userMessage = "Error: " + err;
+router.get('/mempool-summary', function (req, res) {
+  coreApi.getMempoolInfo().then(function (getmempoolinfo) {
+    res.locals.getmempoolinfo = getmempoolinfo
 
-		res.render("mempool-summary");
-	});
-});
+    coreApi.getMempoolStats().then(function (mempoolstats) {
+      res.locals.mempoolstats = mempoolstats
 
-router.get("/peers", function(req, res) {
-	coreApi.getPeerSummary().then(function(peerSummary) {
-		res.locals.peerSummary = peerSummary;
+      res.render('mempool-summary')
+    })
+  }).catch(function (err) {
+    res.locals.userMessage = 'Error: ' + err
 
-		var peerIps = [];
-		for (var i = 0; i < peerSummary.getpeerinfo.length; i++) {
-			var ipWithPort = peerSummary.getpeerinfo[i].addr;
-			if (ipWithPort.lastIndexOf(":") >= 0) {
-				var ip = ipWithPort.substring(0, ipWithPort.lastIndexOf(":"));
-				if (ip.trim().length > 0) {
-					peerIps.push(ip.trim());
-				}
-			}
-		}
+    res.render('mempool-summary')
+  })
+})
 
-		if (peerIps.length > 0) {
-			utils.geoLocateIpAddresses(peerIps).then(function(results) {
-				res.locals.peerIpSummary = results;
-				
-				res.render("peers");
-			});
-		} else {
-			res.render("peers");
-		}
-	}).catch(function(err) {
-		res.locals.userMessage = "Error: " + err;
+router.get('/peers', function (req, res) {
+  coreApi.getPeerSummary().then(function (peerSummary) {
+    res.locals.peerSummary = peerSummary
 
-		res.render("peers");
-	});
-});
+    var peerIps = []
+    for (var i = 0; i < peerSummary.getpeerinfo.length; i++) {
+      var ipWithPort = peerSummary.getpeerinfo[i].addr
+      if (ipWithPort.lastIndexOf(':') >= 0) {
+        var ip = ipWithPort.substring(0, ipWithPort.lastIndexOf(':'))
+        if (ip.trim().length > 0) {
+          peerIps.push(ip.trim())
+        }
+      }
+    }
+
+    if (peerIps.length > 0) {
+      utils.geoLocateIpAddresses(peerIps).then(function (results) {
+        res.locals.peerIpSummary = results
+
+        res.render('peers')
+      })
+    } else {
+      res.render('peers')
+    }
+  }).catch(function (err) {
+    res.locals.userMessage = 'Error: ' + err
+
+    res.render('peers')
+  })
+})
 
 // router.post("/connect", function(req, res) {
 // 	var host = req.body.host;
@@ -222,571 +230,540 @@ router.get("/peers", function(req, res) {
 // 	res.redirect("/");
 // });
 
-router.get("/changeSetting", function(req, res) {
-	if (req.query.name) {
-		req.session[req.query.name] = req.query.value;
+router.get('/changeSetting', function (req, res) {
+  if (req.query.name) {
+    req.session[req.query.name] = req.query.value
+
+    res.cookie('user-setting-' + req.query.name, req.query.value)
+  }
+
+  res.redirect(req.headers.referer)
+})
+
+router.get('/blocks', function (req, res) {
+  var limit = config.site.browseBlocksPageSize
+  var offset = 0
+  var sort = 'desc'
+
+  if (req.query.limit) {
+    limit = parseInt(req.query.limit)
+  }
+
+  if (req.query.offset) {
+    offset = parseInt(req.query.offset)
+  }
+
+  if (req.query.sort) {
+    sort = req.query.sort
+  }
+
+  res.locals.limit = limit
+  res.locals.offset = offset
+  res.locals.sort = sort
+  res.locals.paginationBaseUrl = '/blocks'
+
+  coreApi.getBlockchainInfo().then(function (getblockchaininfo) {
+    res.locals.blockCount = getblockchaininfo.blocks
+    res.locals.blockOffset = offset
+
+    var blockHeights = []
+    if (sort == 'desc') {
+      for (var i = (getblockchaininfo.blocks - offset); i > (getblockchaininfo.blocks - offset - limit); i--) {
+        if (i >= 0) {
+          blockHeights.push(i)
+        }
+      }
+    } else {
+      for (var i = offset; i < (offset + limit); i++) {
+        if (i >= 0) {
+          blockHeights.push(i)
+        }
+      }
+    }
+
+    coreApi.getBlocksByHeight(blockHeights).then(function (blocks) {
+      res.locals.blocks = blocks
+
+      res.render('blocks')
+    })
+  }).catch(function (err) {
+    res.locals.userMessage = 'Error: ' + err
+
+    res.render('blocks')
+  })
+})
+
+router.get('/broadcast', function (req, res) {
+  if (!req.body.query) {
+    // req.session.userMessage = "Enter a block height, block hash, or transaction id.";
+    // req.session.userMessageType = "primary";
+
+    res.render('broadcast')
+  }
+})
+
+router.post('/broadcast', function (req, res) {
+  if (!req.body.query) {
+    req.session.userMessage = 'Enter a block height, block hash, or transaction id.'
+
+    res.redirect('/')
+
+    return
+  }
+
+  var query = req.body.query.toLowerCase().trim()
+  var rawCaseQuery = req.body.query.trim()
+
+  req.session.query = req.body.query
+})
+
+router.get('/search', function (req, res) {
+  if (!req.body.query) {
+    req.session.userMessage = 'Enter a block height, block hash, or transaction id.'
+    req.session.userMessageType = 'primary'
 
-		res.cookie('user-setting-' + req.query.name, req.query.value);
-	}
+    res.render('search')
+  }
+})
 
-	res.redirect(req.headers.referer);
-});
+router.post('/search', function (req, res) {
+  if (!req.body.query) {
+    req.session.userMessage = 'Enter a block height, block hash, or transaction id.'
 
-router.get("/blocks", function(req, res) {
-	var limit = config.site.browseBlocksPageSize;
-	var offset = 0;
-	var sort = "desc";
+    res.redirect('/')
 
-	if (req.query.limit) {
-		limit = parseInt(req.query.limit);
-	}
+    return
+  }
 
-	if (req.query.offset) {
-		offset = parseInt(req.query.offset);
-	}
+  var query = req.body.query.toLowerCase().trim()
+  var rawCaseQuery = req.body.query.trim()
 
-	if (req.query.sort) {
-		sort = req.query.sort;
-	}
+  req.session.query = req.body.query
 
-	res.locals.limit = limit;
-	res.locals.offset = offset;
-	res.locals.sort = sort;
-	res.locals.paginationBaseUrl = "/blocks";
+  if (query.length == 64) {
+    coreApi.getRawTransaction(query).then(function (tx) {
+      if (tx) {
+        res.redirect('/tx/' + query)
 
-	coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
-		res.locals.blockCount = getblockchaininfo.blocks;
-		res.locals.blockOffset = offset;
+        return
+      }
 
-		var blockHeights = [];
-		if (sort == "desc") {
-			for (var i = (getblockchaininfo.blocks - offset); i > (getblockchaininfo.blocks - offset - limit); i--) {
-				if (i >= 0) {
-					blockHeights.push(i);
-				}
-			}
-		} else {
-			for (var i = offset; i < (offset + limit); i++) {
-				if (i >= 0) {
-					blockHeights.push(i);
-				}
-			}
-		}
-		
-		coreApi.getBlocksByHeight(blockHeights).then(function(blocks) {
-			res.locals.blocks = blocks;
+      coreApi.getBlockByHash(query).then(function (blockByHash) {
+        if (blockByHash) {
+          res.redirect('/block/' + query)
 
-			res.render("blocks");
-		});
-	}).catch(function(err) {
-		res.locals.userMessage = "Error: " + err;
+          return
+        }
 
-		res.render("blocks");
-	});
-});
+        coreApi.getAddress(rawCaseQuery).then(function (validateaddress) {
+          if (validateaddress && validateaddress.isvalid) {
+            res.redirect('/address/' + rawCaseQuery)
+          }
+        })
 
-router.get("/broadcast", function(req, res) {
-	if (!req.body.query) {
-		// req.session.userMessage = "Enter a block height, block hash, or transaction id.";
-		// req.session.userMessageType = "primary";
+        req.session.userMessage = 'No results found for query: ' + query
 
-		res.render("broadcast");
+        res.redirect('/')
+      }).catch(function (err) {
+        req.session.userMessage = 'No results found for query: ' + query
 
-		return;
-	}
-});
+        res.redirect('/')
+      })
+    }).catch(function (err) {
+      coreApi.getBlockByHash(query).then(function (blockByHash) {
+        if (blockByHash) {
+          res.redirect('/block/' + query)
 
+          return
+        }
 
-router.post("/broadcast", function(req, res) {
-	if (!req.body.query) {
-		req.session.userMessage = "Enter a block height, block hash, or transaction id.";
+        req.session.userMessage = 'No results found for query: ' + query
 
-		res.redirect("/");
+        res.redirect('/')
+      }).catch(function (err) {
+        req.session.userMessage = 'No results found for query: ' + query
 
-		return;
-	}
+        res.redirect('/')
+      })
+    })
+  } else if (!isNaN(query)) {
+    coreApi.getBlockByHeight(parseInt(query)).then(function (blockByHeight) {
+      if (blockByHeight) {
+        res.redirect('/block-height/' + query)
 
-	var query = req.body.query.toLowerCase().trim();
-	var rawCaseQuery = req.body.query.trim();
+        return
+      }
 
-	req.session.query = req.body.query;
+      req.session.userMessage = 'No results found for query: ' + query
 
-	
-});
+      res.redirect('/')
+    })
+  } else {
+    coreApi.getAddress(rawCaseQuery).then(function (validateaddress) {
+      if (validateaddress && validateaddress.isvalid) {
+        res.redirect('/address/' + rawCaseQuery)
 
+        return
+      }
 
+      req.session.userMessage = 'No results found for query: ' + rawCaseQuery
 
+      res.redirect('/')
+    })
+  }
+})
 
+router.get('/block-height/:blockHeight', function (req, res) {
+  var blockHeight = parseInt(req.params.blockHeight)
 
+  res.locals.blockHeight = blockHeight
 
-router.get("/search", function(req, res) {
-	if (!req.body.query) {
-		req.session.userMessage = "Enter a block height, block hash, or transaction id.";
-		req.session.userMessageType = "primary";
+  res.locals.result = {}
 
-		res.render("search");
+  var limit = config.site.blockTxPageSize
+  var offset = 0
 
-		return;
-	}
-});
+  if (req.query.limit) {
+    limit = parseInt(req.query.limit)
 
-router.post("/search", function(req, res) {
-	if (!req.body.query) {
-		req.session.userMessage = "Enter a block height, block hash, or transaction id.";
+    // for demo sites, limit page sizes
+    if (limit > config.site.blockTxPageSize) {
+      limit = config.site.blockTxPageSize
 
-		res.redirect("/");
+      res.locals.userMessage = 'For now transaction page size limited to ' + config.site.blockTxPageSize + '.'
+    }
+  }
 
-		return;
-	}
+  if (req.query.offset) {
+    offset = parseInt(req.query.offset)
+  }
 
-	var query = req.body.query.toLowerCase().trim();
-	var rawCaseQuery = req.body.query.trim();
+  res.locals.limit = limit
+  res.locals.offset = offset
+  res.locals.paginationBaseUrl = '/block-height/' + blockHeight
 
-	req.session.query = req.body.query;
+  coreApi.getBlockByHeight(blockHeight).then(function (result) {
+    coreApi.getBlockByHashWithTransactions(result.hash, limit, offset).then(function (result) {
+      res.locals.result.getblock = result.getblock
+      res.locals.result.getblock.txCount = (result.getblock.txcount ? result.getblock.txcount : result.getblock.tx.length)
+      res.locals.result.transactions = result.transactions
+      res.locals.result.txInputsByTransaction = result.txInputsByTransaction
 
-	if (query.length == 64) {
-		coreApi.getRawTransaction(query).then(function(tx) {
-			if (tx) {
-				res.redirect("/tx/" + query);
+      res.render('block')
+    })
+  })
+})
 
-				return;
-			}
+router.get('/block/:blockHash', function (req, res) {
+  var blockHash = req.params.blockHash
 
-			coreApi.getBlockByHash(query).then(function(blockByHash) {
-				if (blockByHash) {
-					res.redirect("/block/" + query);
+  res.locals.blockHash = blockHash
 
-					return;
-				}
+  res.locals.result = {}
 
-				coreApi.getAddress(rawCaseQuery).then(function(validateaddress) {
-					if (validateaddress && validateaddress.isvalid) {
-						res.redirect("/address/" + rawCaseQuery);
+  var limit = config.site.blockTxPageSize
+  var offset = 0
 
-						return;
-					}
-				});
+  if (req.query.limit) {
+    limit = parseInt(req.query.limit)
 
-				req.session.userMessage = "No results found for query: " + query;
+    // limit page sizes
+    if (limit > config.site.blockTxPageSize) {
+      limit = config.site.blockTxPageSize
 
-				res.redirect("/");
+      res.locals.userMessage = 'Transaction page size limited to ' + config.site.blockTxPageSize + '. If this is your site, you can change or disable this limit in the site config.'
+    }
+  }
 
-			}).catch(function(err) {
-				req.session.userMessage = "No results found for query: " + query;
+  if (req.query.offset) {
+    offset = parseInt(req.query.offset)
+  }
 
-				res.redirect("/");
-			});
+  res.locals.limit = limit
+  res.locals.offset = offset
+  res.locals.paginationBaseUrl = '/block/' + blockHash
 
-		}).catch(function(err) {
-			coreApi.getBlockByHash(query).then(function(blockByHash) {
-				if (blockByHash) {
-					res.redirect("/block/" + query);
+  // TODO handle RPC error
+  coreApi.getBlockByHashWithTransactions(blockHash, limit, offset).then(function (result) {
+    res.locals.result.getblock = result.getblock
+    res.locals.result.getblock.txCount = (result.getblock.txcount ? result.getblock.txcount : result.getblock.tx.length)
+    res.locals.result.transactions = result.transactions
+    res.locals.result.txInputsByTransaction = result.txInputsByTransaction
 
-					return;
-				}
+    res.render('block')
+  })
+})
 
-				req.session.userMessage = "No results found for query: " + query;
+router.get('/tx/:transactionId', function (req, res) {
+  var txid = req.params.transactionId
 
-				res.redirect("/");
+  var output = -1
+  if (req.query.output) {
+    output = parseInt(req.query.output)
+  }
 
-			}).catch(function(err) {
-				req.session.userMessage = "No results found for query: " + query;
+  res.locals.txid = txid
+  res.locals.output = output
 
-				res.redirect("/");
-			});
-		});
+  res.locals.result = {}
 
-	} else if (!isNaN(query)) {
-		coreApi.getBlockByHeight(parseInt(query)).then(function(blockByHeight) {
-			if (blockByHeight) {
-				res.redirect("/block-height/" + query);
+  coreApi.getRawTransaction(txid).then(function (rawTxResult) {
+    res.locals.result.getrawtransaction = rawTxResult
 
-				return;
-			}
+    client.command('getblock', rawTxResult.blockhash, function (err3, result3, resHeaders3) {
+      res.locals.result.getblock = result3
 
-			req.session.userMessage = "No results found for query: " + query;
+      var txids = []
+      for (var i = 0; i < rawTxResult.vin.length; i++) {
+        if (!rawTxResult.vin[i].coinbase) {
+          txids.push(rawTxResult.vin[i].txid)
+        }
+      }
 
-			res.redirect("/");
-		});
-	} else {
-		coreApi.getAddress(rawCaseQuery).then(function(validateaddress) {
-			if (validateaddress && validateaddress.isvalid) {
-				res.redirect("/address/" + rawCaseQuery);
+      coreApi.getRawTransactions(txids).then(function (txInputs) {
+        res.locals.result.txInputs = txInputs
 
-				return;
-			}
+        res.render('transaction')
+      })
+    })
+  }).catch(function (err) {
+    res.locals.userMessage = 'Failed to load transaction with txid=' + txid + ': ' + err
 
-			req.session.userMessage = "No results found for query: " + rawCaseQuery;
+    res.render('transaction')
+  })
+})
 
-			res.redirect("/");
-		});
-	}
-});
+router.get('/address/:address', function (req, res) {
+  var limit = config.site.addressTxPageSize
+  var offset = 0
+  var sort = 'desc'
 
-router.get("/block-height/:blockHeight", function(req, res) {
-	var blockHeight = parseInt(req.params.blockHeight);
+  if (req.query.limit) {
+    limit = parseInt(req.query.limit)
 
-	res.locals.blockHeight = blockHeight;
+    // limit page sizes
+    if (limit > config.site.addressTxPageSize) {
+      limit = config.site.addressTxPageSize
 
-	res.locals.result = {};
+      res.locals.userMessage = 'Transaction page size limited to ' + config.site.addressTxPageSize + '. If this is your site, you can change or disable this limit in the site config.'
+    }
+  }
 
-	var limit = config.site.blockTxPageSize;
-	var offset = 0;
+  if (req.query.offset) {
+    offset = parseInt(req.query.offset)
+  }
 
-	if (req.query.limit) {
-		limit = parseInt(req.query.limit);
+  if (req.query.sort) {
+    sort = req.query.sort
+  }
 
-		// for demo sites, limit page sizes
-		if (limit > config.site.blockTxPageSize) {
-			limit = config.site.blockTxPageSize;
+  var address = req.params.address
 
-			res.locals.userMessage = "For now transaction page size limited to " + config.site.blockTxPageSize + ".";
-		}
-	}
+  res.locals.address = address
+  res.locals.limit = limit
+  res.locals.offset = offset
+  res.locals.sort = sort
+  res.locals.paginationBaseUrl = ('/address/' + address + '?sort=' + sort)
+  res.locals.transactions = []
 
-	if (req.query.offset) {
-		offset = parseInt(req.query.offset);
-	}
+  res.locals.result = {}
 
-	res.locals.limit = limit;
-	res.locals.offset = offset;
-	res.locals.paginationBaseUrl = "/block-height/" + blockHeight;
+  try {
+    res.locals.addressObj = bitcoinjs.address.fromBase58Check(address)
+  } catch (err) {
+    console.log('Error u3gr02gwef: ' + err)
 
-	coreApi.getBlockByHeight(blockHeight).then(function(result) {
-		coreApi.getBlockByHashWithTransactions(result.hash, limit, offset).then(function(result) {
-			
-			res.locals.result.getblock = result.getblock
-			res.locals.result.getblock.txCount = (result.getblock.txcount?result.getblock.txcount:result.getblock.tx.length)
-			res.locals.result.transactions = result.transactions;
-			res.locals.result.txInputsByTransaction = result.txInputsByTransaction;
+    try {
+      res.locals.addressObj = bitcoinjs.address.fromBech32(address)
+    } catch (err2) {
+      console.log('Error u02qg02yqge: ' + err2)
+    }
+  }
 
-			res.render("block");
-		});
-	});
-});
+  if (global.miningPoolsConfigs) {
+    for (var i = 0; i < global.miningPoolsConfigs.length; i++) {
+      if (global.miningPoolsConfigs[i].payout_addresses[address]) {
+        res.locals.payoutAddressForMiner = global.miningPoolsConfigs[i].payout_addresses[address]
+      }
+    }
+  }
 
-router.get("/block/:blockHash", function(req, res) {
-	var blockHash = req.params.blockHash;
+  res.locals.advancedFunctionality = (global.electrumApi != null)
 
-	res.locals.blockHash = blockHash;
+  coreApi.getAddress(address).then(function (validateaddressResult) {
+    res.locals.result.validateaddress = validateaddressResult
 
-	res.locals.result = {};
+    var promises = []
+    if (global.electrumApi) {
+      var addrScripthash = hexEnc.stringify(sha256(hexEnc.parse(validateaddressResult.scriptPubKey)))
+      addrScripthash = addrScripthash.match(/.{2}/g).reverse().join('')
 
-	var limit = config.site.blockTxPageSize;
-	var offset = 0;
-
-	if (req.query.limit) {
-		limit = parseInt(req.query.limit);
-
-		// limit page sizes
-		if (limit > config.site.blockTxPageSize) {
-			limit = config.site.blockTxPageSize;
-
-			res.locals.userMessage = "Transaction page size limited to " + config.site.blockTxPageSize + ". If this is your site, you can change or disable this limit in the site config.";
-		}
-	}
-
-	if (req.query.offset) {
-		offset = parseInt(req.query.offset);
-	}
-
-	res.locals.limit = limit;
-	res.locals.offset = offset;
-	res.locals.paginationBaseUrl = "/block/" + blockHash;
-
-	// TODO handle RPC error
-	coreApi.getBlockByHashWithTransactions(blockHash, limit, offset).then(function(result) {
-		res.locals.result.getblock = result.getblock;
-		res.locals.result.getblock.txCount = (result.getblock.txcount?result.getblock.txcount:result.getblock.tx.length)
-		res.locals.result.transactions = result.transactions;
-		res.locals.result.txInputsByTransaction = result.txInputsByTransaction;
-
-		res.render("block");
-	});
-});
-
-router.get("/tx/:transactionId", function(req, res) {
-	var txid = req.params.transactionId;
-
-	var output = -1;
-	if (req.query.output) {
-		output = parseInt(req.query.output);
-	}
-
-	res.locals.txid = txid;
-	res.locals.output = output;
-
-	res.locals.result = {};
-
-	coreApi.getRawTransaction(txid).then(function(rawTxResult) {
-		res.locals.result.getrawtransaction = rawTxResult;
-
-		client.command('getblock', rawTxResult.blockhash, function(err3, result3, resHeaders3) {
-			res.locals.result.getblock = result3;
-
-			var txids = [];
-			for (var i = 0; i < rawTxResult.vin.length; i++) {
-				if (!rawTxResult.vin[i].coinbase) {
-					txids.push(rawTxResult.vin[i].txid);
-				}
-			}
-
-			coreApi.getRawTransactions(txids).then(function(txInputs) {
-				res.locals.result.txInputs = txInputs;
-
-				res.render("transaction");
-			});
-		});
-	}).catch(function(err) {
-		res.locals.userMessage = "Failed to load transaction with txid=" + txid + ": " + err;
-
-		res.render("transaction");
-	});
-});
-
-router.get("/address/:address", function(req, res) {
-	var limit = config.site.addressTxPageSize;
-	var offset = 0;
-	var sort = "desc";
-
-	
-	if (req.query.limit) {
-		limit = parseInt(req.query.limit);
-
-		// limit page sizes
-		if (limit > config.site.addressTxPageSize) {
-			limit = config.site.addressTxPageSize;
-
-			res.locals.userMessage = "Transaction page size limited to " + config.site.addressTxPageSize + ". If this is your site, you can change or disable this limit in the site config.";
-		}
-	}
-
-	if (req.query.offset) {
-		offset = parseInt(req.query.offset);
-	}
-
-	if (req.query.sort) {
-		sort = req.query.sort;
-	}
-
-
-	var address = req.params.address;
-
-	res.locals.address = address;
-	res.locals.limit = limit;
-	res.locals.offset = offset;
-	res.locals.sort = sort;
-	res.locals.paginationBaseUrl = ("/address/" + address + "?sort=" + sort);
-	res.locals.transactions = [];
-	
-	res.locals.result = {};
-
-	try {
-		res.locals.addressObj = bitcoinjs.address.fromBase58Check(address);
-
-	} catch (err) {
-		console.log("Error u3gr02gwef: " + err);
-
-		try {
-			res.locals.addressObj = bitcoinjs.address.fromBech32(address);
-
-		} catch (err2) {
-			console.log("Error u02qg02yqge: " + err2);
-		}
-	}
-
-	if (global.miningPoolsConfigs) {
-		for (var i = 0; i < global.miningPoolsConfigs.length; i++) {
-			if (global.miningPoolsConfigs[i].payout_addresses[address]) {
-				res.locals.payoutAddressForMiner = global.miningPoolsConfigs[i].payout_addresses[address];
-			}
-		}
-	}
-
-	res.locals.advancedFunctionality = (global.electrumApi != null);
-
-	coreApi.getAddress(address).then(function(validateaddressResult) {
-		res.locals.result.validateaddress = validateaddressResult;
-
-		var promises = [];
-		if (global.electrumApi) {
-			var addrScripthash = hexEnc.stringify(sha256(hexEnc.parse(validateaddressResult.scriptPubKey)));
-			addrScripthash = addrScripthash.match(/.{2}/g).reverse().join("");
-
-			res.locals.electrumScripthash = addrScripthash;
-
-			promises.push(new Promise(function(resolve, reject) {
-				electrumApi.getAddressBalance(addrScripthash).then(function(result) {
-					res.locals.balance = result;
-
-					res.locals.electrumBalance = result;
-
-					resolve();
-
-				}).catch(function(err) {
-					reject(err);
-				});
-			}));
-
-			promises.push(new Promise(function(resolve, reject) {
-				electrumApi.getAddressTxids(addrScripthash).then(function(result) {
-					var txidResult = null;
-
-					if (result.conflictedResults) {
-						res.locals.conflictedTxidResults = true;
-
-						txidResult = result.conflictedResults[0];
-
-					} else if (result.result != null) {
-						txidResult = result;
-					}
-
-					res.locals.electrumHistory = txidResult;
-
-					var txids = [];
-					var blockHeightsByTxid = {};
-
-					if (txidResult) {
-						for (var i = 0; i < txidResult.result.length; i++) {
-							txids.push(txidResult.result[i].tx_hash);
-							blockHeightsByTxid[txidResult.result[i].tx_hash] = txidResult.result[i].height;
-						}
-					}
-
-					if (sort == "desc") {
-						txids = txids.reverse();
-					}
-
-					res.locals.txids = txids;
-
-					var pagedTxids = [];
-					for (var i = offset; i < (offset + limit); i++) {
-						if (txids.length > i) {
-							pagedTxids.push(txids[i]);
-						}
-					}
-
-					if (txidResult && txidResult.result != null) {
-						// since we always request the first txid (to determine "first seen" info for the address),
-						// remove it for proper paging
-						pagedTxids.unshift(txidResult.result[0].tx_hash);
-					}
-				
-					coreApi.getRawTransactionsWithInputs(pagedTxids, config.site.addressTxMaxInOutDetails).then(function(rawTxResult) {
-						// first result is always the earliest tx, but doesn't fit into the current paging;
-						// store it as firstSeenTransaction then remove from list
-						res.locals.disbaleTxDetails = false;
-						res.locals.firstSeenTransaction = rawTxResult.transactions[0];
-						rawTxResult.transactions.shift();
-
-						res.locals.transactions = rawTxResult.transactions;
-						res.locals.txInputsByTransaction = rawTxResult.txInputsByTransaction;
-						res.locals.blockHeightsByTxid = blockHeightsByTxid;
-
-						var addrGainsByTx = {};
-						var addrLossesByTx = {};
-
-						res.locals.addrGainsByTx = addrGainsByTx;
-						res.locals.addrLossesByTx = addrLossesByTx;
-
-
-						if(rawTxResult.disableMoreDetails){
-							res.locals.disableTxDetails = true
-						}
-
-						if(!res.locals.disableTxDetails){
-							for (var i = 0; i < rawTxResult.transactions.length; i++) {
-								var tx = rawTxResult.transactions[i];
-								var txInputs = rawTxResult.txInputsByTransaction[tx.txid];
-
-								for (var j = 0; j < tx.vout.length; j++) {
-									if (tx.vout[j].value > 0 && tx.vout[j].scriptPubKey && tx.vout[j].scriptPubKey.addresses && tx.vout[j].scriptPubKey.addresses.includes(address)) {
-										if (addrGainsByTx[tx.txid] == null) {
-											addrGainsByTx[tx.txid] = new Decimal(0);
-										}
-
-										addrGainsByTx[tx.txid] = addrGainsByTx[tx.txid].plus(new Decimal(tx.vout[j].value));
-									}
-								}
-
-								for (var j = 0; j < tx.vin.length; j++) {
-									var txInput = txInputs[j];
-
-									if (txInput != null) {
-										for (var k = 0; k < txInput.vout.length; k++) {
-											if (txInput.vout[k] && txInput.vout[k].scriptPubKey && txInput.vout[k].scriptPubKey.addresses && txInput.vout[k].scriptPubKey.addresses.includes(address)) {
-												if (addrLossesByTx[tx.txid] == null) {
-													addrLossesByTx[tx.txid] = new Decimal(0);
-												}
-
-												addrLossesByTx[tx.txid] = addrLossesByTx[tx.txid].plus(new Decimal(txInput.vout[k].value));
-											}
-										}
-									}
-								}
-
-								//console.log("tx: " + JSON.stringify(tx));
-								//console.log("txInputs: " + JSON.stringify(txInputs));
-							}
-						}
-						resolve();
-
-					}).catch(function(err) {
-						console.log("Error asdgf07uh23: " + err + ", error json: " + JSON.stringify(err));
-
-						reject(err);
-					});
-				
-				}).catch(function(err) {
-					res.locals.electrumHistoryError = err;
-
-					console.log("Error 23t07ug2wghefud: " + err + ", error json: " + JSON.stringify(err));
-
-					reject(err);
-				});
-			}));
-
-			promises.push(new Promise(function(resolve, reject) {
-				coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
-					res.locals.getblockchaininfo = getblockchaininfo;
-
-					resolve();
-
-				}).catch(function(err) {
-					console.log("Error 132r80h32rh: " + err + ", error json: " + JSON.stringify(err));
-
-					reject(err);
-				});
-			}));
-		}
-
-		promises.push(new Promise(function(resolve, reject) {
-			qrcode.toDataURL(address, function(err, url) {
-				if (err) {
-					console.log("Error 93ygfew0ygf2gf2: " + err);
-				}
-
-				res.locals.addressQrCodeUrl = url;
-
-				resolve();
-			});
-		}));
-
-		Promise.all(promises).then(function() {
-			res.render("address");
-
-		}).catch(function(err) {
-			console.log("Error 32197rgh327g2: " + err + ", error json: " + JSON.stringify(err));
-
-			res.render("address");
-		});
-		
-	}).catch(function(err) {
-		res.locals.userMessage = "Failed to load address " + address + " (" + err + ")";
-
-		res.render("address");
-	});
-});
+      res.locals.electrumScripthash = addrScripthash
+
+      promises.push(new Promise(function (resolve, reject) {
+        electrumApi.getAddressBalance(addrScripthash).then(function (result) {
+          res.locals.balance = result
+
+          res.locals.electrumBalance = result
+
+          resolve()
+        }).catch(function (err) {
+          reject(err)
+        })
+      }))
+
+      promises.push(new Promise(function (resolve, reject) {
+        electrumApi.getAddressTxids(addrScripthash).then(function (result) {
+          var txidResult = null
+
+          if (result.conflictedResults) {
+            res.locals.conflictedTxidResults = true
+
+            txidResult = result.conflictedResults[0]
+          } else if (result.result != null) {
+            txidResult = result
+          }
+
+          res.locals.electrumHistory = txidResult
+
+          var txids = []
+          var blockHeightsByTxid = {}
+
+          if (txidResult) {
+            for (var i = 0; i < txidResult.result.length; i++) {
+              txids.push(txidResult.result[i].tx_hash)
+              blockHeightsByTxid[txidResult.result[i].tx_hash] = txidResult.result[i].height
+            }
+          }
+
+          if (sort == 'desc') {
+            txids = txids.reverse()
+          }
+
+          res.locals.txids = txids
+
+          var pagedTxids = []
+          for (var i = offset; i < (offset + limit); i++) {
+            if (txids.length > i) {
+              pagedTxids.push(txids[i])
+            }
+          }
+
+          if (txidResult && txidResult.result != null) {
+            // since we always request the first txid (to determine "first seen" info for the address),
+            // remove it for proper paging
+            pagedTxids.unshift(txidResult.result[0].tx_hash)
+          }
+
+          coreApi.getRawTransactionsWithInputs(pagedTxids, config.site.addressTxMaxInOutDetails).then(function (rawTxResult) {
+            // first result is always the earliest tx, but doesn't fit into the current paging;
+            // store it as firstSeenTransaction then remove from list
+            res.locals.disbaleTxDetails = false
+            res.locals.firstSeenTransaction = rawTxResult.transactions[0]
+            rawTxResult.transactions.shift()
+
+            res.locals.transactions = rawTxResult.transactions
+            res.locals.txInputsByTransaction = rawTxResult.txInputsByTransaction
+            res.locals.blockHeightsByTxid = blockHeightsByTxid
+
+            var addrGainsByTx = {}
+            var addrLossesByTx = {}
+
+            res.locals.addrGainsByTx = addrGainsByTx
+            res.locals.addrLossesByTx = addrLossesByTx
+
+            if (rawTxResult.disableMoreDetails) {
+              res.locals.disableTxDetails = true
+            }
+
+            if (!res.locals.disableTxDetails) {
+              for (var i = 0; i < rawTxResult.transactions.length; i++) {
+                var tx = rawTxResult.transactions[i]
+                var txInputs = rawTxResult.txInputsByTransaction[tx.txid]
+
+                for (var j = 0; j < tx.vout.length; j++) {
+                  if (tx.vout[j].value > 0 && tx.vout[j].scriptPubKey && tx.vout[j].scriptPubKey.addresses && tx.vout[j].scriptPubKey.addresses.includes(address)) {
+                    if (addrGainsByTx[tx.txid] == null) {
+                      addrGainsByTx[tx.txid] = new Decimal(0)
+                    }
+
+                    addrGainsByTx[tx.txid] = addrGainsByTx[tx.txid].plus(new Decimal(tx.vout[j].value))
+                  }
+                }
+
+                for (var j = 0; j < tx.vin.length; j++) {
+                  var txInput = txInputs[j]
+
+                  if (txInput != null) {
+                    for (var k = 0; k < txInput.vout.length; k++) {
+                      if (txInput.vout[k] && txInput.vout[k].scriptPubKey && txInput.vout[k].scriptPubKey.addresses && txInput.vout[k].scriptPubKey.addresses.includes(address)) {
+                        if (addrLossesByTx[tx.txid] == null) {
+                          addrLossesByTx[tx.txid] = new Decimal(0)
+                        }
+
+                        addrLossesByTx[tx.txid] = addrLossesByTx[tx.txid].plus(new Decimal(txInput.vout[k].value))
+                      }
+                    }
+                  }
+                }
+
+                // console.log("tx: " + JSON.stringify(tx));
+                // console.log("txInputs: " + JSON.stringify(txInputs));
+              }
+            }
+            resolve()
+          }).catch(function (err) {
+            console.log('Error asdgf07uh23: ' + err + ', error json: ' + JSON.stringify(err))
+
+            reject(err)
+          })
+        }).catch(function (err) {
+          res.locals.electrumHistoryError = err
+
+          console.log('Error 23t07ug2wghefud: ' + err + ', error json: ' + JSON.stringify(err))
+
+          reject(err)
+        })
+      }))
+
+      promises.push(new Promise(function (resolve, reject) {
+        coreApi.getBlockchainInfo().then(function (getblockchaininfo) {
+          res.locals.getblockchaininfo = getblockchaininfo
+
+          resolve()
+        }).catch(function (err) {
+          console.log('Error 132r80h32rh: ' + err + ', error json: ' + JSON.stringify(err))
+
+          reject(err)
+        })
+      }))
+    }
+
+    promises.push(new Promise(function (resolve, reject) {
+      qrcode.toDataURL(address, function (err, url) {
+        if (err) {
+          console.log('Error 93ygfew0ygf2gf2: ' + err)
+        }
+
+        res.locals.addressQrCodeUrl = url
+
+        resolve()
+      })
+    }))
+
+    Promise.all(promises).then(function () {
+      res.render('address')
+    }).catch(function (err) {
+      console.log('Error 32197rgh327g2: ' + err + ', error json: ' + JSON.stringify(err))
+
+      res.render('address')
+    })
+  }).catch(function (err) {
+    res.locals.userMessage = 'Failed to load address ' + address + ' (' + err + ')'
+
+    res.render('address')
+  })
+})
 
 // router.get("/rpc-terminal", function(req, res) {
 // 	if (!config.demoSite) {
@@ -937,7 +914,7 @@ router.get("/address/:address", function(req, res) {
 // 						if (err3) {
 // 							if (result3) {
 // 								res.locals.methodResult = {error:("" + err3), result:result3};
-								
+
 // 							} else {
 // 								res.locals.methodResult = {error:("" + err3)};
 // 							}
@@ -970,110 +947,108 @@ router.get("/address/:address", function(req, res) {
 // 	});
 // });
 
-router.get("/unconfirmed-tx", function(req, res) {
-	var limit = config.site.browseBlocksPageSize;
-	var offset = 0;
-	var sort = "desc";
+router.get('/unconfirmed-tx', function (req, res) {
+  var limit = config.site.browseBlocksPageSize
+  var offset = 0
+  var sort = 'desc'
 
-	if (req.query.limit) {
-		limit = parseInt(req.query.limit);
-	}
+  if (req.query.limit) {
+    limit = parseInt(req.query.limit)
+  }
 
-	if (req.query.offset) {
-		offset = parseInt(req.query.offset);
-	}
+  if (req.query.offset) {
+    offset = parseInt(req.query.offset)
+  }
 
-	if (req.query.sort) {
-		sort = req.query.sort;
-	}
+  if (req.query.sort) {
+    sort = req.query.sort
+  }
 
-	res.locals.limit = limit;
-	res.locals.offset = offset;
-	res.locals.sort = sort;
-	res.locals.paginationBaseUrl = "/unconfirmed-tx";
+  res.locals.limit = limit
+  res.locals.offset = offset
+  res.locals.sort = sort
+  res.locals.paginationBaseUrl = '/unconfirmed-tx'
 
-	coreApi.getMempoolDetails(offset, limit).then(function(mempoolDetails) {
-		res.locals.mempoolDetails = mempoolDetails;
+  coreApi.getMempoolDetails(offset, limit).then(function (mempoolDetails) {
+    res.locals.mempoolDetails = mempoolDetails
 
-		res.render("unconfirmed-transactions");
+    res.render('unconfirmed-transactions')
+  }).catch(function (err) {
+    res.locals.userMessage = 'Error: ' + err
 
-	}).catch(function(err) {
-		res.locals.userMessage = "Error: " + err;
+    res.render('unconfirmed-transactions')
+  })
+})
 
-		res.render("unconfirmed-transactions");
-	});
-});
+router.get('/tx-stats', function (req, res) {
+  var dataPoints = 150
 
-router.get("/tx-stats", function(req, res) {
-	var dataPoints = 150;
+  if (req.query.dataPoints) {
+    dataPoints = req.query.dataPoints
+  }
 
-	if (req.query.dataPoints) {
-		dataPoints = req.query.dataPoints;
-	}
+  if (dataPoints > 250) {
+    dataPoints = 250
+  }
 
-	if (dataPoints > 250) {
-		dataPoints = 250;
-	}
+  coreApi.getBlockchainInfo().then(function (getblockchaininfo) {
+    res.locals.getblockchaininfo = getblockchaininfo
 
-	coreApi.getBlockchainInfo().then(function(getblockchaininfo) {
-		res.locals.getblockchaininfo = getblockchaininfo;
+    var chainTxStatsIntervals = []
+    for (var i = 0; i < dataPoints; i++) {
+      chainTxStatsIntervals.push(parseInt(Math.max(10, getblockchaininfo.blocks - i * getblockchaininfo.blocks / (dataPoints - 1) - 1)))
+    }
 
-		var chainTxStatsIntervals = [];
-		for (var i = 0; i < dataPoints; i++) {
-			chainTxStatsIntervals.push(parseInt(Math.max(10, getblockchaininfo.blocks - i * getblockchaininfo.blocks / (dataPoints - 1) - 1)));
-		}
+    // console.log("ints: " + JSON.stringify(chainTxStatsIntervals));
 
-		//console.log("ints: " + JSON.stringify(chainTxStatsIntervals));
+    var promises = []
+    for (var i = 0; i < chainTxStatsIntervals.length; i++) {
+      promises.push(coreApi.getChainTxStats(chainTxStatsIntervals[i]))
+    }
 
-		var promises = [];
-		for (var i = 0; i < chainTxStatsIntervals.length; i++) {
-			promises.push(coreApi.getChainTxStats(chainTxStatsIntervals[i]));
-		}
+    Promise.all(promises).then(function (results) {
+      res.locals.txStatResults = results
 
-		Promise.all(promises).then(function(results) {
-			res.locals.txStatResults = results;
+      var txStats = {
+        txCounts: [],
+        txLabels: [],
+        txRates: []
+      }
 
-			var txStats = {
-				txCounts: [],
-				txLabels: [],
-				txRates: []
-			};
+      for (var i = results.length - 1; i >= 0; i--) {
+        if (results[i].window_tx_count) {
+          txStats.txCounts.push({ x: (getblockchaininfo.blocks - results[i].window_block_count), y: (results[i].txcount - results[i].window_tx_count) })
+          txStats.txRates.push({ x: (getblockchaininfo.blocks - results[i].window_block_count), y: (results[i].txrate) })
+          txStats.txLabels.push(i)
+        }
+      }
 
-			for (var i = results.length - 1; i >= 0; i--) {
-				if (results[i].window_tx_count) {
-					txStats.txCounts.push( {x:(getblockchaininfo.blocks - results[i].window_block_count), y: (results[i].txcount - results[i].window_tx_count)} );
-					txStats.txRates.push( {x:(getblockchaininfo.blocks - results[i].window_block_count), y: (results[i].txrate)} );
-					txStats.txLabels.push(i);
-				}
-			}
+      res.locals.txStats = txStats
 
-			res.locals.txStats = txStats;
+      // console.log("res: " + JSON.stringify(results));
 
-			//console.log("res: " + JSON.stringify(results));
+      res.render('tx-stats')
+    })
+  })
+})
 
-			res.render("tx-stats");
-		});
-	});
-	
-});
+router.get('/about', function (req, res) {
+  res.render('about')
+})
 
-router.get("/about", function(req, res) {
-	res.render("about");
-});
+router.get('/fun', function (req, res) {
+  var sortedList = coins[config.coin].historicalData
+  sortedList.sort(function (a, b) {
+    return ((a.date > b.date) ? 1 : -1)
+  })
 
-router.get("/fun", function(req, res) {
-	var sortedList = coins[config.coin].historicalData;
-	sortedList.sort(function(a, b){
-		return ((a.date > b.date) ? 1 : -1);
-	});
+  res.locals.historicalData = sortedList
 
-	res.locals.historicalData = sortedList;
-	
-	res.render("fun");
-});
+  res.render('fun')
+})
 
-router.get("/notifications", function(req, res) {
-	res.render("notifications");
-});
+router.get('/notifications', function (req, res) {
+  res.render('notifications')
+})
 
-module.exports = router;
+module.exports = router
