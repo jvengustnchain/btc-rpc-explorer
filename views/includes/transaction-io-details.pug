@@ -32,7 +32,7 @@ div(class="row monospace")
 									else
 										if (vout && vout.scriptPubKey && vout.scriptPubKey.addresses)
 											div(style="word-break: break-word;")
-												a(href=("/address/" + vout.scriptPubKey.addresses[0])) #{vout.scriptPubKey.addresses[0]}
+												a(href=(config.prefix+"/address/" + vout.scriptPubKey.addresses[0])) #{vout.scriptPubKey.addresses[0]}
 												if (global.specialAddresses[vout.scriptPubKey.addresses[0]])
 													- var specialAddressInfo = global.specialAddresses[vout.scriptPubKey.addresses[0]];
 													if (specialAddressInfo.type == "minerPayout")
@@ -45,7 +45,7 @@ div(class="row monospace")
 															i(class="fas fa-certificate text-primary")
 
 											span(class="small") via 
-												a(href=("/tx/" + txInput.txid + "#output-" + txVin.vout)) #{txInput.txid.substring(0, 20)}...[#{txVin.vout}]
+												a(href=(config.prefix+"/tx/" + txInput.txid + "#output-" + txVin.vout)) #{txInput.txid.substring(0, 20)}...[#{txVin.vout}]
 
 								div(class="tx-io-value")
 									if (txVin.coinbase)
@@ -86,7 +86,7 @@ div(class="row monospace")
 							div(class="tx-io-desc")
 								if (vout.scriptPubKey)
 									if (vout.scriptPubKey.addresses)
-										a(id=("output-" + voutIndex), href=("/address/" + vout.scriptPubKey.addresses[0]))
+										a(id=("output-" + voutIndex), href=(config.prefix+"/address/" + vout.scriptPubKey.addresses[0]))
 											span(class="monospace", style="word-break: break-word;") #{vout.scriptPubKey.addresses[0]}
 
 										if (global.specialAddresses[vout.scriptPubKey.addresses[0]])

@@ -44,7 +44,7 @@ div(class="tab-content")
 							div(class="summary-split-table-label") Previous Block
 							div(class="summary-split-table-content monospace")
 								if (result.getblock.previousblockhash)
-									a(class="word-wrap", href=("/block/" + result.getblock.previousblockhash)) #{result.getblock.previousblockhash}
+									a(class="word-wrap", href=(config.prefix+"/block/" + result.getblock.previousblockhash)) #{result.getblock.previousblockhash}
 									br
 									span (##{result.getblock.height - 1})
 
@@ -124,7 +124,7 @@ div(class="tab-content")
 							div(class="summary-split-table-label") Next Block
 							div(class="summary-split-table-content monospace")
 								if (result.getblock.nextblockhash)
-									a(href=("/block/" + result.getblock.nextblockhash)) #{result.getblock.nextblockhash}
+									a(href=(config.prefix+"/block/" + result.getblock.nextblockhash)) #{result.getblock.nextblockhash}
 									br
 									span (##{(result.getblock.height + 1)})
 								else
@@ -223,7 +223,7 @@ div(class="tab-content")
 							if (tx && tx.txid)
 								span ##{(txIndex + offset + 1).toLocaleString()}
 								span  &ndash; 
-								a(href=("/tx/" + tx.txid)) #{tx.txid}
+								a(href=(config.prefix+"/tx/" + tx.txid)) #{tx.txid}
 								if (global.specialTransactions && global.specialTransactions[tx.txid])
 									span
 										a(data-toggle="tooltip", title=(coinConfig.name + " Fun! See transaction for details"))
