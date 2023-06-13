@@ -7,7 +7,8 @@ var coins = require('../coins.js')
 
 // choose one of the below: RPC to a node, or mock data while testing
 var rpcApi = require('./rpcApi.js')
-var newApi = require('./newApi.js')
+//var newApi = require('./newApi.js')
+var newApi = rpcApi
 // var rpcApi = require("./mockApi.js");
 
 var miscCache = LRU(25)

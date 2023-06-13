@@ -12,11 +12,11 @@ block content
 			ul(class="pagination justify-content-center")
 				
 				li(class="page-item", class=(sort == "desc" ? "active" : false))
-					a(class="page-link", href=(sort == "desc" ? "javascript:void(0)" : "/blocks?limit=" + limit + "&offset=0" + "&sort=desc"))
+					a(class="page-link", href=(sort == "desc" ? "javascript:void(0)" : config.prefix+"/blocks?limit=" + limit + "&offset=0" + "&sort=desc"))
 						span(aria-hidden="true") Newest blocks first
 
 				li(class="page-item", class=(sort == "asc" ? "active" : false))
-					a(class="page-link", href=(sort == "asc" ? "javascript:void(0)" : "/blocks?limit=" + limit + "&offset=0" + "&sort=asc"))
+					a(class="page-link", href=(sort == "asc" ? "javascript:void(0)" : config.prefix+"/blocks?limit=" + limit + "&offset=0" + "&sort=asc"))
 						span(aria-hidden="true") Oldest blocks first
 
 		include includes/blocks-list.pug

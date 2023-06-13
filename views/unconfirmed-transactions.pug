@@ -29,7 +29,7 @@ block content
 							if (tx && tx.txid)
 								strong ##{(txIndex + offset).toLocaleString()}
 								span  &ndash; 
-								a(href=("/tx/" + tx.txid)) #{tx.txid}
+								a(href=(config.prefix+"/tx/" + tx.txid)) #{tx.txid}
 									
 						div(class="card-body")
 							- var txInputs = mempoolDetails.txInputsByTransaction[tx.txid];

@@ -31,11 +31,11 @@ block content
 							each item, index in coinConfig.miningPoolsConfigUrls
 								if (index > 0)
 									span , 
-								a(href=item) config ##{index + 1}
+								a(href=config.prefix+item) config ##{index + 1}
 							span )
 						else
 							span  (see the configuration
-							a(href=coinConfig.miningPoolsConfigUrls[0]) here
+							a(href=config.prefix+coinConfig.miningPoolsConfigUrls[0]) here
 							span )
 			else if (global.specialAddresses[address] && global.specialAddresses[address].type == "donation")
 				div(class="alert alert-primary", style="padding-bottom: 0;")
@@ -107,7 +107,7 @@ block content
 											span #{server.host}
 											span  : #{server.port}
 
-								a(href="/changeSetting?name=hideElectrumTrustWarnings&value=true", class="close", aria-label="Close", style="text-decoration: none;")
+								a(href="config.prefix+/changeSetting?name=hideElectrumTrustWarnings&value=true", class="close", aria-label="Close", style="text-decoration: none;")
 									span(aria-hidden="true") &times;
 
 					div(class="card mb-3")
@@ -149,7 +149,7 @@ block content
 												if (getblockchaininfo)
 													span Block ##{(getblockchaininfo.blocks - firstSeenTransaction.confirmations).toLocaleString()}
 												else
-													a(href=("/block/" + firstSeenTransaction.blockhash)) #{firstSeenTransaction.blockhash}
+													a(href=(config.prefix+"/block/" + firstSeenTransaction.blockhash)) #{firstSeenTransaction.blockhash}
 
 												br
 
@@ -262,7 +262,7 @@ block content
 										//- 	span Oldest First
 
 									div(class="dropdown-menu dropdown-menu-right")
-										a(href=("/address/" + address), class="dropdown-item")
+										a(href=(config.prefix+"/address/" + address), class="dropdown-item")
 											if (sort == "desc")
 												i(class="fa fa-check") 
 											span  Newest First
@@ -306,7 +306,7 @@ block content
 											div(class="row")
 												div(class="col-md-6")
 													if (tx && tx.txid)
-														a(href=("/tx/" + tx.txid)) #{tx.txid}
+														a(href=(config.prefix+"/tx/" + tx.txid)) #{tx.txid}
 
 														if (global.specialTransactions && global.specialTransactions[tx.txid])
 															span  

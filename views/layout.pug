@@ -5,7 +5,7 @@ html(lang="en")
 		meta(name="viewport", content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no")
 		
 		if (session.uiTheme && session.uiTheme == "dark")
-			link(rel="stylesheet", href="/css/bootstrap-dark.css")
+			link(rel="stylesheet", href=config.prefix+"/css/bootstrap-dark.css")
 
 			style.
 				hr { background-color: #555555; }
@@ -28,7 +28,7 @@ html(lang="en")
 	body
 		nav(class="navbar navbar-expand-lg navbar-dark bg-dark mb-4")
 			div(class="container")
-				a(class="navbar-brand", href="/")
+				a(class="navbar-brand", href=(config.prefix+"/"))
 					span
 						if (coinConfig.logoUrl)
 							img(src=coinConfig.siteLogo, class="header-image", alt="logo")
@@ -41,66 +41,66 @@ html(lang="en")
 					if (client)
 						ul(class="navbar-nav mr-auto")
 							li(class="nav-item")
-								a(href="/about", class="nav-link")
+								a(href=(config.prefix+"/about"), class="nav-link")
 									span About
 
 							if (config.siteTools)
 								li(class="nav-item dropdown")
-									a(class="nav-link dropdown-toggle", href="javascript:void(0)", role="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false") 
+									a(class="nav-link dropdown-toggle", href="javascript:void(0)", role="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false")
 										span  Tools
 									div(class="dropdown-menu", aria-label="Tools Items")
 										each item in config.siteTools
-											a(class="dropdown-item", href=item.url)
+											a(class="dropdown-item", href=(config.prefix+item.url))
 												i(class=item.fontawesome, style="width: 20px; margin-right: 10px;")
 												span  #{item.name}
 
 							if (config.headerDropdownLinks)
 								li(class="nav-item dropdown")
-									a(class="nav-link dropdown-toggle", href="javascript:void(0)", role="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false") 
+									a(class="nav-link dropdown-toggle", href="javascript:void(0)", role="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false")
 										span  #{config.headerDropdownLinks.title}
 									div(class="dropdown-menu", aria-label=(config.headerDropdownLinks.title + " Items"))
 										each item in config.headerDropdownLinks.links
-											a(class="dropdown-item", href=item.url)
+											a(class="dropdown-item", href=(config.prefix+item.url))
 												img(src=item.imgUrl, style="width: 24px; height: 24px; margin-right: 8px;", alt=item.name)
 												span  #{item.name}
 
 							li(class="nav-item dropdown")
-								a(class="nav-link dropdown-toggle", href="javascript:void(0)", id="navbarDropdown", role="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false") 
+								a(class="nav-link dropdown-toggle", href="javascript:void(0)", id="navbarDropdown", role="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="false")
 									i(class="fas fa-cog")
 									span  Settings
 								div(class="dropdown-menu", aria-labelledby="navbarDropdown")
 									if (coinConfig.currencyUnits)
 										span(class="dropdown-header") Currency Units
 										each item in coinConfig.currencyUnits
-											a(class="dropdown-item", href=("/changeSetting?name=currencyFormatType&value=" + item.values[0]))
+											a(class="dropdown-item", href=(config.prefix+"/changeSetting?name=currencyFormatType&value=" + item.values[0]))
 												each valueName in item.values
 													if (currencyFormatType == valueName)
 														i(class="fas fa-check")
 												span  #{item.name}
 
 									span(class="dropdown-header") Theme
-									a(class="dropdown-item", href="/changeSetting?name=uiTheme&value=light")
+									a(class="dropdown-item", href=config.prefix+"/changeSetting?name=uiTheme&value=light")
 										if (session.uiTheme == "light" || session.uiTheme == "")
 											i(class="fas fa-check")
 										span  Light
-									a(class="dropdown-item", href="/changeSetting?name=uiTheme&value=dark")
+									a(class="dropdown-item", href=config.prefix+"/changeSetting?name=uiTheme&value=dark")
 										if (session.uiTheme == "dark")
 											i(class="fas fa-check")
 										span  Dark
 
-						form(method="post", action="/search", class="form-inline")
+						form(method="post", action=(config.prefix+"/search"), class="form-inline")
 							div(class="input-group input-group-sm")
 								input(type="text", class="form-control form-control-sm", name="query", placeholder="block height/hash, txid, address", value=(query), style="width: 300px;")
 								div(class="input-group-append")
 									button(type="submit", class="btn btn-primary")
 										i(class="fas fa-search")
-		
+
 		if (host && port && !homepage)
 			div(id="sub-menu", class="container mb-4", style="margin-top: -1.0rem;")
 				ul(class="nav")
 					each item, index in config.siteTools
 						li(class="nav-item")
-							a(href=item.url, class="nav-link")
+							a(href=config.prefix+item.url, class="nav-link")
 								span #{item.name}
 					
 
@@ -158,10 +158,10 @@ html(lang="en")
 												br
 												if (coinConfig.ticker == coin)
 													span #{coin} address: 
-													a(href=("/address/" + config.donationAddresses[coin].address)) #{"QR"}
+													a(href=(config.prefix+"/address/" + config.donationAddresses[coin].address)) #{"QR"}
 												else
 													span #{coin} address: 
-													a(href=(config.donationAddresses.sites[coin] + "/address/" + config.donationAddresses[coin].address)) #{"QR"}
+													a(href=(config.prefix+"/"+config.donationAddresses.sites[coin] + "/address/" + config.donationAddresses[coin].address)) #{"QR"}
 
 		
 		script(src="https://code.jquery.com/jquery-3.3.1.min.js", integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=", crossorigin="anonymous")

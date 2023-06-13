@@ -62,6 +62,11 @@ process.on("unhandledRejection", (reason, p) => {
 
 
 app.runOnStartup = function() {
+	if ( process.env.PREFIX && process.env.PREFIX !== "" ) {
+		config.prefix = "/"+process.env.PREFIX;
+	}else {
+		config.prefix = "";
+	}
 	global.config = config;
 	global.coinConfig = coins[config.coin];
 	global.coinConfigs = coins;
@@ -303,9 +308,13 @@ app.use(function(req, res, next) {
 
 	next();
 });
-
-app.use('/', baseActionsRouter);
-
+// check for prefix environment variable
+if (process.env.PREFIX) {
+	// set prefix
+	app.use("/" + process.env.PREFIX, baseActionsRouter)
+}else {
+	app.use('/', baseActionsRouter);
+}
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {
 	var err = new Error('Not Found');

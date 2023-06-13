@@ -3,7 +3,11 @@ var rp = require('request-promise')
 var config = require('./../config.js')
 
 function getServiceURL () {
-  return 'http://' + config.apiServers[0].host + ':' + config.apiServers[0].port + '/'
+  if ( process.env.PREFIX && process.env.PREFIX !== "" ) {
+    return 'http://' + config.apiServers[0].host + ':' + config.apiServers[0].port + '/' + process.env.PREFIX + '/'
+  } else {
+    return 'http://' + config.apiServers[0].host + ':' + config.apiServers[0].port + '/'
+  }
 }
 
 function getBlockByHash (blockHash) {

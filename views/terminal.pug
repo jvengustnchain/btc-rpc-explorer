@@ -11,7 +11,7 @@ block content
 		div(class="col")
 			if (!config.demoSite && (!config.credentials.rpc || !config.credentials.rpc.rpc))
 				span(style="float: right;")
-					a(href="/disconnect", class="btn btn-secondary") Disconnect from node
+					a(href=config.prefix+"/disconnect", class="btn btn-secondary") Disconnect from node
 	
 	hr
 
