@@ -73,18 +73,18 @@ app.runOnStartup = function() {
 
 	console.log("Running RPC Explorer for " + global.coinConfig.name);
 
-	var rpcCredentials = null;
-	if (config.credentials.rpc) {
-		rpcCredentials = config.credentials.rpc;
+  var rpcCredentials = null;
 
-	} else if (process.env.RPC_HOST) {
-		rpcCredentials = {
-			host: process.env.RPC_HOST,
-			port: process.env.RPC_PORT,
-			username: process.env.RPC_USERNAME,
-			password: process.env.RPC_PASSWORD
-		};
-	}
+  if (process.env.RPC_HOST) {
+    rpcCredentials = {
+      host: process.env.RPC_HOST,
+      port: process.env.RPC_PORT,
+      username: process.env.RPC_USERNAME,
+      password: process.env.RPC_PASSWORD,
+    };
+  } else if (config.credentials.rpc) {
+    rpcCredentials = config.credentials.rpc;
+  }
 
 	if (rpcCredentials) {
 		console.log("Connecting via RPC to node at " + config.credentials.rpc.host + ":" + config.credentials.rpc.port);
@@ -139,7 +139,7 @@ app.runOnStartup = function() {
 			console.log("Live with ElectrumX API.");
 
 			global.electrumApi = electrumApi;
-			
+
 		}).catch(function(err) {
 			console.log("Error 31207ugf4e0fed: " + err + ", while initializing ElectrumX API");
 		});
@@ -155,7 +155,7 @@ app.runOnStartup = function() {
 						var responseBody = JSON.parse(body);
 
 						resolve(responseBody);
-						
+
 					} else {
 						console.log("Error:");
 						console.log(error);
@@ -218,7 +218,7 @@ app.use(function(req, res, next) {
 
 	res.locals.config = global.config;
 	res.locals.coinConfig = global.coinConfig;
-	
+
 	res.locals.host = req.session.host;
 	res.locals.port = req.session.port;
 
@@ -285,10 +285,10 @@ app.use(function(req, res, next) {
 
 	if (req.session.userMessage) {
 		res.locals.userMessage = req.session.userMessage;
-		
+
 		if (req.session.userMessageType) {
 			res.locals.userMessageType = req.session.userMessageType;
-			
+
 		} else {
 			res.locals.userMessageType = "warning";
 		}
