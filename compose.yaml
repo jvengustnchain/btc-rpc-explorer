@@ -1,0 +1,21 @@
+services:
+  bsv-node:
+    image: bitcoinsv/bitcoin-sv:1.0.14
+    ports:
+      - "18332:18332"
+    volumes:
+      - ./bitcoin.conf:/data/bitcoin.conf
+
+  woc-explorer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+    environment:
+      RPC_HOST: bsv-node
+      RPC_PORT: "18332"
+      RPC_USER: bitcoin
+      RPC_PASS: bitcoin
+      HOST: "0.0.0.0"
+      PORT: "3002"

@@ -1,6 +1,6 @@
-FROM node:8
+FROM node:18
 WORKDIR /workspace
 COPY . .
-RUN npm install
+RUN npm ci
 CMD npm start
 EXPOSE 3002

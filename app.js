@@ -79,8 +79,8 @@ app.runOnStartup = function() {
     rpcCredentials = {
       host: process.env.RPC_HOST,
       port: process.env.RPC_PORT,
-      username: process.env.RPC_USERNAME,
-      password: process.env.RPC_PASSWORD,
+      username: process.env.RPC_USER,
+      password: process.env.RPC_PASS,
     };
   } else if (config.credentials.rpc) {
     rpcCredentials = config.credentials.rpc;
