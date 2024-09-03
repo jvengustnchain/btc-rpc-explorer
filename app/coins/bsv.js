@@ -6,7 +6,7 @@ var btcCurrencyUnits = [
 		name:"SNT",
 		multiplier:1,
 		default:true,
-		values:["", "bsv", "BSV"],
+		values:["", "snt", "SNT"],
 		decimalPlaces:8
 	},
 	{
