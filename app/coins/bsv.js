@@ -3,16 +3,16 @@ Decimal8 = Decimal.clone({ precision:8, rounding:8 });
 
 var btcCurrencyUnits = [
 	{
-		name:"BSV",
+		name:"SNT",
 		multiplier:1,
 		default:true,
 		values:["", "bsv", "BSV"],
 		decimalPlaces:8
 	},
 	{
-		name:"mBSV",
+		name:"mSNT",
 		multiplier:1000,
-		values:["mBSV"],
+		values:["mSNT"],
 		decimalPlaces:5
 	},
 	{
@@ -35,9 +35,9 @@ module.exports = {
 	logoUrl:"/img/logo/bsv.png",
 	siteTitle:"WhatsOnChain.com",
 	siteLogo:"/img/logo/WOC-GY-10.png",
-	pageTitle: "BSV Explorer",
-	siteDescriptionHtml:"<b>whatsonchain.com - Bitcoin SV Blockchain Explorer</b> is <a href='whatsonchain.com).",
-	nodeTitle:"Bitcoin SV Full Node",
+	pageTitle: "SovnetExplorer",
+	siteDescriptionHtml:"<b>Sovnet Explorerr</b> is <a href='whatsonchain.com).",
+	nodeTitle:"SOVNET Full Node",
 	nodeUrl:"https://github.com/bitcoin-sv/bitcoin-sv/releases",
 	// demoSiteUrl: "https://btc.chaintools.io",
 	miningPoolsConfigUrls:[
@@ -46,7 +46,7 @@ module.exports = {
 	],
 	maxBlockWeight: 4000000,
 	currencyUnits:btcCurrencyUnits,
-	currencyUnitsByName:{"BSV":btcCurrencyUnits[0], "mBSV":btcCurrencyUnits[1], "bits":btcCurrencyUnits[2], "sat":btcCurrencyUnits[3]},
+	currencyUnitsByName:{"SNT":btcCurrencyUnits[0], "mSNT":btcCurrencyUnits[1], "bits":btcCurrencyUnits[2], "sat":btcCurrencyUnits[3]},
 	baseCurrencyUnit:btcCurrencyUnits[3],
 	feeSatoshiPerByteBucketMaxima: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 50, 75, 100, 150],
 	genesisBlockHash: "000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f",
