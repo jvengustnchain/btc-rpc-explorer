@@ -33,7 +33,7 @@ module.exports = {
 	name:"BSV",
 	ticker:"BSV",
 	logoUrl:"/img/logo/bsv.png",
-	siteTitle:"WhatsOnChain.com",
+	siteTitle:"SovNet Explorer",
 	siteLogo:"/img/logo/WOC-GY-10.png",
 	pageTitle: "SovnetExplorer",
 	siteDescriptionHtml:"<b>Sovnet Explorerr</b> is <a href='whatsonchain.com).",
