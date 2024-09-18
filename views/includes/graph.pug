@@ -21,7 +21,7 @@ div(class="vizOuter")
             linkspan.setAttribute('x', '1');
             linkspan.setAttribute('fill', 'blue');
             link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
-            link.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', 'https://whatsonchain.com/blocks');
+            link.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '/blocks');
             link.setAttribute('target', '_blank');
             link.textContent = 'Click here to explore more blocks....';
             linkspan.appendChild(link);
@@ -41,7 +41,7 @@ div(class="vizOuter")
                 linkspan.setAttribute('x', '1');
                 linkspan.setAttribute('fill', 'blue');
                 link = document.createElementNS('http://www.w3.org/2000/svg', 'a');
-                link.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', 'https://whatsonchain.com/block-height/'+ blocks[i].height);
+                link.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '/block-height/'+ blocks[i].height);
                 link.setAttribute('target', '_blank');
                 link.textContent = "#" + blocks[i].height;
                 linkspan.appendChild(link);
