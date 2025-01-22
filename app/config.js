@@ -124,7 +124,8 @@ module.exports = {
     sites: { 'BSV': 'https://whatsonchain.com' },
 
     'BSV': { address: 'bitcoincash:qq7su5mghkkamjss3g87g3eejxf8f3excuekujtlev' }
-  }
+  },
+  theme: process.env.THEME || 'default'
 
 // headerDropdownLinks: {
   // title:"Related Sites",

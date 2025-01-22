@@ -15,7 +15,10 @@ html(lang="en")
 		link(rel="stylesheet", href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Ubuntu:400,700")
 		link(rel="stylesheet", href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/default.min.css")
 		link(rel="stylesheet", href="/css/radial-progress.css", type="text/css")
-		link(rel='stylesheet', href='/css/styling.css')
+		if (config.theme === "oman")
+			link(rel='stylesheet', href='/css/styling-oman.css')
+		else
+			link(rel='stylesheet', href='/css/styling-uae.css')
 
 		link(rel="icon", type="image/png", href=("/img/logo/woc-favicon-blk.png"))
 		script(src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.min.js")
@@ -26,7 +29,7 @@ html(lang="en")
 			title Explorer
 		
 	body
-		nav(class="navbar navbar-expand-lg navbar-dark bg-dark mb-4")
+		nav(class="navbar navbar-expand-lg navbar-dark navbar-color mb-4")
 			div(class="container")
 				a(class="navbar-brand", href=(config.prefix+"/"))
 					span
@@ -120,9 +123,22 @@ html(lang="en")
 					div(class="row")
 						div(class="col-md-5")
 							dl
-								dt Source
-								dd
-									a(href="https://github.com/waqas64/woc-explorer") github.com/waqas64/woc-explorer
+								dt Country
+								if (config.theme === "uae")
+									dd  <div style="padding-top:0.7rem" /></div>
+										<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="0 0 12 6">
+										<rect width="12" height="6" fill="#00732f" id="green"/>
+										<rect width="12" height="4" y="2" fill="#fff"/>
+										<rect width="12" height="2" y="4"/>
+										<rect width="3" height="6" fill="#f00" id="red"/></svg>
+								else
+									dd <div style="padding-top:0.7rem" /></div>
+										<svg xmlns="http://www.w3.org/2000/svg" width="60" height="30" viewBox="0 0 12 6">
+										<path fill="#008751" d="M0 0h12v6H0z"/>
+										<path fill="#C8102E" d="M0 0h12v4H0z"/>
+										<path fill="#fff" d="M0 0h12v2H0z"/>
+										<path fill="#C8102E" d="M0 0h3v6H0z"/>
+										</svg>
 
 								//- dt Running Version
 								//- dd

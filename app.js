@@ -67,6 +67,8 @@ app.runOnStartup = function() {
 	}else {
 		config.prefix = "";
 	}
+
+	config.theme = process.env.THEME
 	global.config = config;
 	global.coinConfig = coins[config.coin];
 	global.coinConfigs = coins;
